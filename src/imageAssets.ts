@@ -24,14 +24,15 @@ export const makeAppXImages = async (
   await fs.ensureDir(assetPath)
   for (const scale of REQUIRED_APPX_SCALES) {
     const scaleMultiplier = scale / 100.0
+
     for (const dimensions of REQUIRED_APPX_DIMENSIONS) {
       const { w, h } = dimensions
+      const [imageWidth, imageHeight] = [
+        Math.trunc(w * scaleMultiplier),
+        Math.trunc(h * scaleMultiplier),
+      ]
 
       const baseName = dimensions.specialName ?? `${appID}-${w}x${h}Logo`
-
-      const imageName = `${baseName}.png`
-      const pathinManifestWithoutScale = path.join('assets', imageName)
-      const pathOnDiskWithoutScale = path.join(path.join(assetPath, imageName))
 
       const imageNamewithScale = `${baseName}.scale-${scale}.png`
       const pathOnDiskWithScale = path.join(path.join(assetPath, imageNamewithScale))
@@ -40,10 +41,6 @@ export const makeAppXImages = async (
       const image = Sharp(config.appIcon)
       // Small touch: superimpose the app icon on a background for banner-sized images
       if ((h > 300 || w > 300) && config.wallpaperIcon) {
-        const [imageWidth, imageHeight] = [
-          Math.trunc(w * scaleMultiplier),
-          Math.trunc(h * scaleMultiplier),
-        ]
         const bgimage = Sharp(config.wallpaperIcon).resize(imageWidth, imageHeight, {
           fit: 'cover',
           background: { r: 0, g: 0, b: 0, alpha: 0 },
@@ -59,7 +56,7 @@ export const makeAppXImages = async (
           .toFile(pathOnDiskWithScale)
       } else {
         await image
-          .resize(Math.trunc(w * scaleMultiplier), Math.trunc(h * scaleMultiplier), {
+          .resize(imageWidth, imageHeight, {
             fit: 'contain',
             background: { r: 0, g: 0, b: 0, alpha: 0 },
           })
@@ -67,6 +64,10 @@ export const makeAppXImages = async (
       }
 
       if (scale === 100) {
+        const imageName = `${baseName}.png`
+        const pathinManifestWithoutScale = path.join('assets', imageName)
+        const pathOnDiskWithoutScale = path.join(path.join(assetPath, imageName))
+
         await fs.copyFile(pathOnDiskWithScale, pathOnDiskWithoutScale)
         fileMapping[pathinManifestWithoutScale] = pathOnDiskWithoutScale
       }
