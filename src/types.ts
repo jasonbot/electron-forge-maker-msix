@@ -1,6 +1,6 @@
 import type { SignOptions } from '@electron/windows-sign'
 
-export type MSIXCodesignOptions = Omit<Omit<SignOptions, 'appDirectory'>, 'hashes'>
+export type MSIXCodesignOptions = Omit<SignOptions, 'appDirectory' | 'hashes'>
 
 export type MakerMSIXConfig = {
   appIcon: string
