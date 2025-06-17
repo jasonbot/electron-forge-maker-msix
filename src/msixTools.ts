@@ -57,7 +57,7 @@ export const writeContentTypeXML = async (outPath: string): Promise<FileMapping>
 
 export const getPublisher = async (
   installMapping: FileMapping,
-  config: MakerMSIXConfig,
+  config: MakerMSIXConfig
 ): Promise<string> => {
   const exes = Object.values(installMapping).filter((f) => f.toLowerCase().endsWith('.exe'))
   if (exes.length > 0) {
@@ -123,8 +123,8 @@ const makeAppManifestXML = ({
     xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
     IgnorableNamespaces="uap uap3 uap10 desktop7 rescap">
     <Identity Name="${publisher}" Publisher="${
-    publisher.startsWith('CN=') ? publisher : `CN=${publisher}`
-  }" Version="${version}" ProcessorArchitecture="${architecture}" />
+      publisher.startsWith('CN=') ? publisher : `CN=${publisher}`
+    }" Version="${version}" ProcessorArchitecture="${architecture}" />
     <Properties>
         <DisplayName>${appName}</DisplayName>
         <PublisherDisplayName>${appName}</PublisherDisplayName>
@@ -175,7 +175,7 @@ export const makeManifestConfiguration = (
   version: string,
   executable: string,
   config: MakerMSIXConfig & Required<Pick<MakerMSIXConfig, 'publisher'>>,
-  options: MakerOptions,
+  options: MakerOptions
 ): MSIXAppManifestMetadata => {
   return {
     appID,
@@ -192,7 +192,7 @@ export const makeManifestConfiguration = (
 
 export const makeAppManifest = async (
   outPath: string,
-  manifestConfig: MSIXAppManifestMetadata,
+  manifestConfig: MSIXAppManifestMetadata
 ): Promise<FileMapping> => {
   await fs.ensureDir(outPath)
   const outFilePath = path.join(outPath, 'AppxManifest.xml')
@@ -212,7 +212,7 @@ export const makeAppInstallerXML = ({
 }: MSIXAppManifestMetadata) => {
   const MSIXURL = `${baseDownloadURL?.replace(
     /\/+$/,
-    '',
+    ''
   )}/${appName}-${architecture}-${version}.msix`
 
   return `<?xml version="1.0" encoding="utf-8"?>
@@ -241,12 +241,12 @@ export const makeAppInstallerXML = ({
 
 export const makeAppInstaller = async (
   outPath: string,
-  manifestConfig: MSIXAppManifestMetadata,
+  manifestConfig: MSIXAppManifestMetadata
 ): Promise<string | undefined> => {
   await fs.ensureDir(outPath)
   const outFilePath = path.join(
     outPath,
-    `${manifestConfig.appName}-${manifestConfig.architecture}.AppInstaller`,
+    `${manifestConfig.appName}-${manifestConfig.architecture}.AppInstaller`
   )
 
   if (manifestConfig.baseDownloadURL) {

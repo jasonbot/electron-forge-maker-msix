@@ -17,7 +17,7 @@ const REQUIRED_APPX_SCALES: number[] = [100, 125, 150, 200, 400]
 export const makeAppXImages = async (
   appID: string,
   outPath: string,
-  config: MakerMSIXConfig,
+  config: MakerMSIXConfig
 ): Promise<FileMapping> => {
   const fileMapping: FileMapping = {}
   const assetPath = path.join(outPath, 'assets')

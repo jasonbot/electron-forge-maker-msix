@@ -25,7 +25,7 @@ export const codesign = async (config: MakerMSIXConfig, outPath: string) => {
     } catch (error) {
       console.error(
         'Failed to codesign using @electron/windows-sign. Check your config and the output for details!',
-        error,
+        error
       )
       throw error
     }

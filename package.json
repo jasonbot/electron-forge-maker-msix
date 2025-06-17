@@ -1,6 +1,6 @@
 {
-	"name": "@jasonbot/electron-forge-maker-msix",
-	"version": "7.2.0",
+	"name": "@jasonscheirer/electron-forge-maker-msix",
+	"version": "0.1.0",
 	"description": "An `electron-forge` maker for MSIX that supports `electron-forge` v6 and can be used as a replacement for `electron-builder`. Supports code-signing.",
 	"main": "dist/cjs/makerMsix.js",
 	"module": "dist/esm/makerMsix.js",
@@ -14,10 +14,10 @@
 		"url": "git+https://github.com/jasonbot/electron-forge-maker-msix.git"
 	},
 	"author": {
-		"name": "Felix Rieseberg",
-		"email": "felix@jasonbot.com"
+		"name": "Jason Scheirer",
+		"email": "jason.scheirer@gmail.com"
 	},
-	"license": "MIT",
+	"license": "Apache 2",
 	"bugs": {
 		"url": "https://github.com/jasonbot/electron-forge-maker-msix/issues"
 	},
@@ -37,19 +37,23 @@
 		"@types/node": "^16.11.6",
 		"@typescript-eslint/eslint-plugin": "^5.45.0",
 		"@typescript-eslint/parser": "^5.45.0",
-		"eslint": "^8.29.0",
+		"eslint": "^8.57.1",
 		"eslint-config-eslint": "^7.0.0",
+		"eslint-config-prettier": "^10.1.5",
 		"eslint-config-standard": "^17.0.0",
 		"eslint-plugin-import": "^2.26.0",
 		"eslint-plugin-node": "^11.1.0",
+		"eslint-plugin-prettier": "^5.5.0",
 		"eslint-plugin-promise": "^6.1.1",
+		"prettier": "^3.5.3",
 		"standard": "^17.0.0",
 		"typescript": "^5.0.4"
 	},
 	"scripts": {
 		"build": "tsc && tsc -p tsconfig.esm.json",
 		"lint": "eslint --ext .ts,.js src",
-		"prepublishOnly": "yarn build"
+		"prepublishOnly": "yarn build",
+		"format": "prettier --write src"
 	},
 	"engines": {
 		"node": ">=12.0.0"

@@ -17,7 +17,7 @@ import type { FileMapping, MakerMSIXConfig, PathInManifest } from './types'
 import { walk } from './walk'
 
 const inventoryInstallFilesForMapping = async (
-  rootPath: string,
+  rootPath: string
 ): Promise<[string, FileMapping]> => {
   const fileMapping: FileMapping = {}
 
@@ -43,7 +43,7 @@ const inventoryInstallFilesForMapping = async (
 
 const writeMappingFile = async (
   fileMapping: FileMapping,
-  mappingFilename: string,
+  mappingFilename: string
 ): Promise<void> => {
   log(`Writing file mapping to ${fileMapping}`)
   const contentLines = ['[Files]']
@@ -130,7 +130,7 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
         ...this.config,
         publisher,
       },
-      options,
+      options
     )
 
     const appManifestMapping: FileMapping = await makeAppManifest(scratchPath, manifestConfig)
@@ -145,20 +145,20 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
       installMapping,
       imageAssetMapping,
       priFileMapping,
-      contentTypeFileMapping,
+      contentTypeFileMapping
     )
     const fileMappingFilenameOnDisk = path.join(outPath, 'filemapping.txt')
     writeMappingFile(manifestMapping, fileMappingFilenameOnDisk)
 
     const outMSIX = path.join(
       outPath,
-      `${options.appName}-${options.targetArch}-${manifestConfig.version}.msix`,
+      `${options.appName}-${options.targetArch}-${manifestConfig.version}.msix`
     )
     await makeMSIX(scratchPath, outMSIX, this.config)
 
     const latestMSIXPath = path.join(
       outPath,
-      `${options.appName}-${options.targetArch}-latest.msix`,
+      `${options.appName}-${options.targetArch}-latest.msix`
     )
 
     await fs.copyFile(outMSIX, latestMSIXPath)
