@@ -13,6 +13,7 @@ const REQUIRED_APPX_DIMENSIONS: ImageDimensions[] = [
   { w: 50, h: 50, specialName: 'StoreLogo' },
 ]
 const REQUIRED_APPX_SCALES: number[] = [100, 125, 150, 200, 400]
+const INVISIBLE: Sharp.RGBA = { r: 0, g: 0, b: 0, alpha: 0 }
 
 export const makeAppXImages = async (
   appID: string,
@@ -43,12 +44,12 @@ export const makeAppXImages = async (
       if ((h > 300 || w > 300) && config.wallpaperIcon) {
         const bgimage = Sharp(config.wallpaperIcon).resize(imageWidth, imageHeight, {
           fit: 'cover',
-          background: { r: 0, g: 0, b: 0, alpha: 0 },
+          background: INVISIBLE,
         })
         const overlayicon = await image
           .resize(Math.trunc(imageWidth * 0.85), Math.trunc(imageHeight * 0.85), {
             fit: 'inside',
-            background: { r: 0, g: 0, b: 0, alpha: 0 },
+            background: INVISIBLE,
           })
           .toBuffer()
         await bgimage
@@ -58,7 +59,7 @@ export const makeAppXImages = async (
         await image
           .resize(imageWidth, imageHeight, {
             fit: 'contain',
-            background: { r: 0, g: 0, b: 0, alpha: 0 },
+            background: INVISIBLE,
           })
           .toFile(pathOnDiskWithScale)
       }
