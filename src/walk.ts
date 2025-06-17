@@ -12,7 +12,7 @@ export async function* walk(dir: string): AsyncGenerator<string> {
   }
 }
 
-export async function findInWindowsKits(exename: string): string {
+export async function findInWindowsKits(exename: string): Promise<string> {
   const searchPath = 'C:\\Program Files (x86)\\Windows Kits\\10'
 
   const foundExes: string[] = []
