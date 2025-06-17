@@ -14,7 +14,7 @@ import {
 import { log, run } from './run'
 import { codesign } from './sign'
 import type { FileMapping, MakerMSIXConfig, PathInManifest } from './types'
-import { walk } from './walk'
+import { findInWindowsKits, walk } from './walk'
 
 const inventoryInstallFilesForMapping = async (
   rootPath: string
@@ -57,9 +57,7 @@ const writeMappingFile = async (
 }
 
 const makeMSIX = async (scratchPath: string, outMSIX: string, config: MakerMSIXConfig) => {
-  const makeAppXPath =
-    config.makeAppXPath ??
-    'C:\\Program Files (x86)\\Windows Kits\\10\\App Certification Kit\\makeappx.exe'
+  const makeAppXPath = config.makeAppXPath ?? (await findInWindowsKits('makeappx.exe'))
 
   try {
     if ((await fs.stat(outMSIX)).isFile()) {

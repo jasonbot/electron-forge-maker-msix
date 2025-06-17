@@ -3,13 +3,12 @@ import fs from 'fs-extra'
 import path from 'node:path'
 import { run } from './run'
 import type { FileMapping, MakerMSIXConfig, MSIXAppManifestMetadata } from './types'
+import { findInWindowsKits } from './walk'
 
 export const makePRI = async (outPath: string, config: MakerMSIXConfig): Promise<FileMapping> => {
   const glob = require('node:fs/promises').glob
 
-  const makePRIPath =
-    config.makePriPath ??
-    'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x86\\makepri.exe'
+  const makePRIPath = config.makePriPath ?? (await findInWindowsKits('makepri.exe'))
 
   const outPriPath = path.join(outPath, 'resources.pri')
   const priConfigPath = path.join(outPath, 'priconfig.xml')
@@ -67,7 +66,9 @@ export const getPublisher = async (
     if (foundPublisher) {
       return foundPublisher
     } else {
-      throw new Error(`Could not determine publisher: ${exes[0]} is not signed.`)
+      throw new Error(
+        `Could not determine publisher: ${exes[0]} is not signed or sigcheck is not installed.`
+      )
     }
   } else {
     throw new Error('Could not determine publisher: nothing signed')
