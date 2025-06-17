@@ -1,0 +1,66 @@
+{
+  "extends": "standard",
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "env": {
+    "browser": true
+  },
+  "rules": {
+    "no-var": "error",
+    "no-unused-vars": "off",
+    "no-global-assign": "off",
+    "space-before-function-paren": "off",
+    "guard-for-in": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "args": "after-used",
+        "ignoreRestSiblings": true
+      }
+    ],
+    "prefer-const": [
+      "error",
+      {
+        "destructuring": "all"
+      }
+    ],
+    "standard/no-callback-literal": "off",
+    "node/no-deprecated-api": "off",
+    "no-useless-constructor": "off"
+  },
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "overrides": [
+    {
+      "files": "*.js",
+      "rules": {
+        "@typescript-eslint/no-unused-vars": "off"
+      }
+    },
+    {
+      "files": "*.ts",
+      "rules": {
+        "no-undef": "off",
+        "no-redeclare": "off",
+        "no-use-before-define": "off",
+        "semi": [
+              "error",
+          "never"
+        ],
+        "comma-dangle": ["error", "always"]
+      }
+    },
+    {
+      "files": "*.d.ts",
+      "rules": {
+        "no-useless-constructor": "off",
+        "@typescript-eslint/no-unused-vars": "off"
+      }
+    }
+  ]
+}
