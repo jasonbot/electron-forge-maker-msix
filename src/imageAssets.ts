@@ -3,7 +3,11 @@ import path from 'node:path'
 import Sharp from 'sharp'
 import type { FileMapping, MakerMSIXConfig } from './types'
 
-type ImageDimensions = { h: number; w: number; specialName?: string }
+type ImageDimensions = {
+  w: number
+  h: number
+  specialName?: string
+}
 const REQUIRED_APPX_DIMENSIONS: ImageDimensions[] = [
   { w: 150, h: 150 },
   { w: 44, h: 44 },
