@@ -1,11 +1,12 @@
 import type { MakerOptions } from '@electron-forge/maker-base'
 import fs from 'fs-extra'
-import { glob } from 'node:fs/promises'
 import path from 'node:path'
 import { run } from './run'
 import type { FileMapping, MakerMSIXConfig, MSIXAppManifestMetadata } from './types'
 
 export const makePRI = async (outPath: string, config: MakerMSIXConfig): Promise<FileMapping> => {
+  const glob = require('node:fs/promises').glob
+
   const makePRIPath =
     config.makePriPath ??
     'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x86\\makepri.exe'
