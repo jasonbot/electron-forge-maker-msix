@@ -138,6 +138,9 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
 
     // Write file mapping
     // Combine all the files we need to install into a single filemapping
+    // Note the file mapping is an unneccessary relic -- if we use MakeAppx.exe
+    // with the mapping, it will cease to autogenerate any other other
+    // convenience files like `AppxSignature.p7x` and wthe blockmaps.
     const manifestMapping = Object.assign(
       appManifestMapping,
       installMapping,
@@ -154,13 +157,6 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
     )
     await makeMSIX(scratchPath, outMSIX, this.config)
 
-    const latestMSIXPath = path.join(
-      outPath,
-      `${options.appName}-${options.targetArch}-latest.msix`
-    )
-
-    await fs.copyFile(outMSIX, latestMSIXPath)
-
-    return [outMSIX, latestMSIXPath, appInstallerPath].filter((filename) => filename !== undefined)
+    return [outMSIX, appInstallerPath].filter((filename) => filename !== undefined)
   }
 }
