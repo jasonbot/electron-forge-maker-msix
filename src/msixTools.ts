@@ -186,7 +186,7 @@ export const makeManifestConfiguration = (
     architecture: options.targetArch,
     version: version.split('.').concat(['0', '0', '0', '0']).slice(0, 4).join('.'),
     publisher: config.publisher,
-    protocols: config.protocols,
+    protocols: options.forgeConfig.packagerConfig.protocols?.flatMap((p) => p.schemes) ?? [],
     baseDownloadURL: config.baseDownloadURL,
   }
 }

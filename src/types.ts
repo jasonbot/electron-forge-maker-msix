@@ -12,7 +12,6 @@ export type MakerMSIXConfig = {
   makePriPath?: string
   sigCheckPath?: string
   codesign?: MSIXCodesignOptions
-  protocols?: string[]
   baseDownloadURL?: string
 }
 
