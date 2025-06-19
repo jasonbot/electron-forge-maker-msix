@@ -13,47 +13,27 @@ import {
 } from './msixTools'
 import { log, run } from './run'
 import { codesign } from './sign'
-import type { FileMapping, MakerMSIXConfig, PathInManifest } from './types'
+import type { MakerMSIXConfig } from './types'
 import { findInWindowsKits, walk } from './walk'
 
-const inventoryInstallFilesForMapping = async (
-  rootPath: string
-): Promise<[string, FileMapping]> => {
-  const fileMapping: FileMapping = {}
-
+const findMainExecutable = async (rootPath: string): Promise<string> => {
   let executable: string | undefined
   for await (const fileName of walk(rootPath)) {
-    const relativeFileName: PathInManifest = fileName
-      .substring(rootPath.length)
-      .replace(/^[\\/]+/, '')
+    const relativeFileName = fileName.substring(rootPath.length).replace(/^[\\/]+/, '')
 
-    if (!executable && relativeFileName.toLocaleLowerCase().endsWith('.exe')) {
+    if (
+      relativeFileName.toLocaleLowerCase().endsWith('.exe') &&
+      (!executable || executable.split(/[/\\]/).length > relativeFileName.split(/[/\\]/).length)
+    ) {
       executable = relativeFileName
     }
-
-    fileMapping[relativeFileName] = fileName
   }
 
   if (!executable) {
     throw new Error(`No executable file found in ${rootPath}`)
   }
 
-  return [executable, fileMapping]
-}
-
-const writeMappingFile = async (
-  fileMapping: FileMapping,
-  mappingFilename: string
-): Promise<void> => {
-  log(`Writing file mapping to ${fileMapping}`)
-  const contentLines = ['[Files]']
-
-  for (const [inManifest, onDisk] of Object.entries(fileMapping)) {
-    contentLines.push(`"${onDisk}" "${inManifest}"`)
-  }
-
-  // Lol dos
-  await fs.writeFile(mappingFilename, contentLines.join('\r\n'))
+  return executable
 }
 
 const makeMSIX = async (scratchPath: string, outMSIX: string, config: MakerMSIXConfig) => {
@@ -105,10 +85,10 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
     await fs.ensureDir(outPath)
 
     // Find all the files to be installed
-    const [executable, installMapping] = await inventoryInstallFilesForMapping(scratchPath)
+    const executable = await findMainExecutable(scratchPath)
 
     // Generate images for various tile sizes
-    const imageAssetMapping = await makeAppXImages(appID, scratchPath, this.config)
+    await makeAppXImages(appID, scratchPath, this.config)
 
     // Actual AppxManifest.xml, the orchestration layer
 
@@ -117,7 +97,7 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
     if (this.config.publisher) {
       publisher = this.config.publisher
     } else {
-      publisher = await getPublisher(installMapping, this.config)
+      publisher = await getPublisher(executable, this.config)
     }
 
     const manifestConfig = makeManifestConfiguration(
@@ -131,25 +111,10 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
       options
     )
 
-    const appManifestMapping: FileMapping = await makeAppManifest(scratchPath, manifestConfig)
+    await makeAppManifest(scratchPath, manifestConfig)
     const appInstallerPath = await makeAppInstaller(outPath, manifestConfig)
-    const priFileMapping = await makePRI(scratchPath, this.config)
-    const contentTypeFileMapping = await writeContentTypeXML(scratchPath)
-
-    // Write file mapping
-    // Combine all the files we need to install into a single filemapping
-    // Note the file mapping is an unneccessary relic -- if we use MakeAppx.exe
-    // with the mapping, it will cease to autogenerate any other other
-    // convenience files like `AppxSignature.p7x` and wthe blockmaps.
-    const manifestMapping = Object.assign(
-      appManifestMapping,
-      installMapping,
-      imageAssetMapping,
-      priFileMapping,
-      contentTypeFileMapping
-    )
-    const fileMappingFilenameOnDisk = path.join(outPath, 'filemapping.txt')
-    writeMappingFile(manifestMapping, fileMappingFilenameOnDisk)
+    await makePRI(scratchPath, this.config)
+    await writeContentTypeXML(scratchPath)
 
     const outMSIX = path.join(
       outPath,

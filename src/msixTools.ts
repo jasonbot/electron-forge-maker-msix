@@ -2,12 +2,10 @@ import type { MakerOptions } from '@electron-forge/maker-base'
 import fs from 'fs-extra'
 import path from 'node:path'
 import { run } from './run'
-import type { FileMapping, MakerMSIXConfig, MSIXAppManifestMetadata } from './types'
+import type { MakerMSIXConfig, MSIXAppManifestMetadata } from './types'
 import { findInWindowsKits } from './walk'
 
-export const makePRI = async (outPath: string, config: MakerMSIXConfig): Promise<FileMapping> => {
-  const glob = require('node:fs/promises').glob
-
+export const makePRI = async (outPath: string, config: MakerMSIXConfig): Promise<void> => {
   const makePRIPath = config.makePriPath ?? (await findInWindowsKits('makepri.exe'))
 
   const outPriPath = path.join(outPath, 'resources.pri')
@@ -15,16 +13,18 @@ export const makePRI = async (outPath: string, config: MakerMSIXConfig): Promise
 
   await run(makePRIPath, ['createconfig', '/cf', priConfigPath, '/dq', 'en-US', '/pv', '10.0.0'])
   await run(makePRIPath, ['new', '/cf', priConfigPath, '/pr', outPath, '/of', outPriPath])
-
-  const fileMapping: FileMapping = {}
-  for await (const item of await glob(path.join(outPath, '*.pri'))) {
-    fileMapping[path.basename(item)] = item
-  }
-
-  return fileMapping
 }
 
-export const writeContentTypeXML = async (outPath: string): Promise<FileMapping> => {
+const xmlSafeString = (input: string | undefined): string | undefined =>
+  input &&
+  [
+    ['&', '&amp;'],
+    ['"', '&quot;'],
+    ['<', '&lt;'],
+    ['>', '&gt;'],
+  ].reduce((input, [fromString, toNewString]) => input.replace(fromString, toNewString), input)
+
+export const writeContentTypeXML = async (outPath: string): Promise<void> => {
   const fileName = '[Content_Types].xml'
   const outFileName = path.join(outPath, fileName)
   const co = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -50,28 +50,21 @@ export const writeContentTypeXML = async (outPath: string): Promise<FileMapping>
 </Types>`
 
   await fs.writeFile(outFileName, co)
-
-  return { fileName: outFileName }
 }
 
 export const getPublisher = async (
-  installMapping: FileMapping,
+  executable: string,
   config: MakerMSIXConfig
 ): Promise<string> => {
-  const exes = Object.values(installMapping).filter((f) => f.toLowerCase().endsWith('.exe'))
-  if (exes.length > 0) {
-    const stdout = await run(config.sigCheckPath ?? 'sigcheck.exe', ['-accepteula', exes[0]], true)
-    const publisherRE = /\r\n[ \t]+Publisher:[ \t]+(?<publisher>.+?)\r\n/
-    const foundPublisher = stdout.match(publisherRE)?.groups?.publisher
-    if (foundPublisher) {
-      return foundPublisher
-    } else {
-      throw new Error(
-        `Could not determine publisher: ${exes[0]} is not signed or sigcheck is not installed.`
-      )
-    }
+  const stdout = await run(config.sigCheckPath ?? 'sigcheck.exe', ['-accepteula', executable], true)
+  const publisherRE = /\r\n[ \t]+Publisher:[ \t]+(?<publisher>.+?)\r\n/
+  const foundPublisher = stdout.match(publisherRE)?.groups?.publisher
+  if (foundPublisher) {
+    return foundPublisher
   } else {
-    throw new Error('Could not determine publisher: nothing signed')
+    throw new Error(
+      `Could not determine publisher: ${executable} is not signed or sigcheck is not installed.`
+    )
   }
 }
 
@@ -88,28 +81,30 @@ const makeAppManifestXML = ({
   let extensions = `
         <desktop:Extension
           Category="windows.startupTask"
-          Executable="${executable}"
+          Executable="${xmlSafeString(executable)}"
           EntryPoint="Windows.FullTrustApplication">
-          <desktop:StartupTask TaskId="SlackStartup" Enabled="true" DisplayName="${appName}" />
+          <desktop:StartupTask TaskId="SlackStartup" Enabled="true" DisplayName="${xmlSafeString(appName)}" />
         </desktop:Extension>
         <uap3:Extension
           Category="windows.appExecutionAlias"
-          Executable="${executable}"
+          Executable="${xmlSafeString(executable)}"
           EntryPoint="Windows.FullTrustApplication">
           <uap3:AppExecutionAlias>
-            <desktop:ExecutionAlias Alias="${executable.split(/[/\\]/).pop()}" />
+            <desktop:ExecutionAlias Alias="${xmlSafeString(executable.split(/[/\\]/).pop())}" />
           </uap3:AppExecutionAlias>
         </uap3:Extension>
 `
 
   if (protocols) {
-    for (const protocol of protocols) {
-      extensions += `<uap3:Extension Category="windows.protocol">
-                    <uap3:Protocol Name="${protocol}" Parameters="&quot;%1&quot;">
-                        <uap:DisplayName>${protocol}</uap:DisplayName>
+    for (const protocolGroup of protocols) {
+      for (const protocol of protocolGroup.schemes) {
+        extensions += `<uap3:Extension Category="windows.protocol">
+                    <uap3:Protocol Name="${xmlSafeString(protocol)}" Parameters="&quot;%1&quot;">
+                        <uap:DisplayName>${xmlSafeString(protocol === protocolGroup.name ? protocol : `${protocolGroup.name} (${protocol})`)}</uap:DisplayName>
                     </uap3:Protocol>
                 </uap3:Extension>
 `
+      }
     }
   }
 
@@ -123,13 +118,13 @@ const makeAppManifestXML = ({
     xmlns:desktop7="http://schemas.microsoft.com/appx/manifest/desktop/windows10/7"
     xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
     IgnorableNamespaces="uap uap3 uap10 desktop7 rescap">
-    <Identity Name="${publisher}" Publisher="${
-      publisher.startsWith('CN=') ? publisher : `CN=${publisher}`
-    }" Version="${version}" ProcessorArchitecture="${architecture}" />
+    <Identity Name="${xmlSafeString(publisher)}" Publisher="${
+      publisher.startsWith('CN=') ? publisher : `CN=${xmlSafeString(publisher)}`
+    }" Version="${xmlSafeString(version)}" ProcessorArchitecture="${xmlSafeString(architecture)}" />
     <Properties>
-        <DisplayName>${appName}</DisplayName>
-        <PublisherDisplayName>${appName}</PublisherDisplayName>
-        <Description>${appDescription}</Description>
+        <DisplayName>${xmlSafeString(appName)}</DisplayName>
+        <PublisherDisplayName>${xmlSafeString(appName)}</PublisherDisplayName>
+        <Description>${xmlSafeString(appDescription)}</Description>
         <Logo>assets\\StoreLogo.png</Logo>
         <uap10:PackageIntegrity>
             <uap10:Content Enforcement="on" />
@@ -146,14 +141,14 @@ const makeAppManifestXML = ({
         <Capability Name="internetClient" />
     </Capabilities>
     <Applications>
-        <Application Id="${appID}" Executable="${executable}"
+        <Application Id="${xmlSafeString(appID)}" Executable="${xmlSafeString(executable)}"
             EntryPoint="Windows.FullTrustApplication">
             <uap:VisualElements BackgroundColor="transparent" DisplayName="Notion"
-                Square150x150Logo="assets\\${appID}-150x150Logo.png"
-                Square44x44Logo="assets\\${appID}-44x44Logo.png" Description="Notion">
-                <uap:DefaultTile Wide310x150Logo="assets\\${appID}-310x150Logo.png"
-                    Square310x310Logo="assets\\${appID}-310x310Logo.png"
-                    Square71x71Logo="assets\\${appID}-71x71Logo.png" />
+                Square150x150Logo="assets\\${xmlSafeString(appID)}-150x150Logo.png"
+                Square44x44Logo="assets\\${xmlSafeString(appID)}-44x44Logo.png" Description="Notion">
+                <uap:DefaultTile Wide310x150Logo="assets\\${xmlSafeString(appID)}-310x150Logo.png"
+                    Square310x310Logo="assets\\${xmlSafeString(appID)}-310x310Logo.png"
+                    Square71x71Logo="assets\\${xmlSafeString(appID)}-71x71Logo.png" />
             </uap:VisualElements>
             <Extensions>
                 ${extensions}
@@ -162,7 +157,7 @@ const makeAppManifestXML = ({
     </Applications>
     <Extensions>
         <desktop2:Extension Category="windows.firewallRules">
-            <desktop2:FirewallRules Executable="${executable}">
+            <desktop2:FirewallRules Executable="${xmlSafeString(executable)}">
                 <desktop2:Rule Direction="in" IPProtocol="TCP" Profile="all"/>
                 <desktop2:Rule Direction="out" IPProtocol="TCP" Profile="all"/>
             </desktop2:FirewallRules>
@@ -186,7 +181,7 @@ export const makeManifestConfiguration = (
     architecture: options.targetArch,
     version: version.split('.').concat(['0', '0', '0', '0']).slice(0, 4).join('.'),
     publisher: config.publisher,
-    protocols: options.forgeConfig.packagerConfig.protocols?.flatMap((p) => p.schemes) ?? [],
+    protocols: options.forgeConfig.packagerConfig.protocols,
     baseDownloadURL: config.baseDownloadURL,
   }
 }
@@ -194,14 +189,12 @@ export const makeManifestConfiguration = (
 export const makeAppManifest = async (
   outPath: string,
   manifestConfig: MSIXAppManifestMetadata
-): Promise<FileMapping> => {
+): Promise<void> => {
   await fs.ensureDir(outPath)
   const outFilePath = path.join(outPath, 'AppxManifest.xml')
   const manifestXML = makeAppManifestXML(manifestConfig)
 
   fs.writeFile(outFilePath, manifestXML)
-
-  return { 'AppxManifest.xml': outFilePath }
 }
 
 export const makeAppInstallerXML = ({
@@ -214,28 +207,26 @@ export const makeAppInstallerXML = ({
   const MSIXURL = `${baseDownloadURL?.replace(
     /\/+$/,
     ''
-  )}/${appName}-${architecture}-${version}.msix`
+  )}/${xmlSafeString(appName)}-${xmlSafeString(architecture)}-${xmlSafeString(version)}.msix`
 
   return `<?xml version="1.0" encoding="utf-8"?>
 <AppInstaller
     xmlns="http://schemas.microsoft.com/appx/appinstaller/2021"
     Version="1.0.0.0"
     Uri="http://mywebservice.azurewebsites.net/appset.appinstaller" >
-
     <MainBundle
-        Name="${appName}"
-        Publisher="${publisher.startsWith('CN=') ? publisher : `CN=${publisher}`}"
-        Version="${version}"
-        Uri="${MSIXURL}" />
-
+        Name="${xmlSafeString(appName)}"
+        Publisher="${xmlSafeString(publisher.startsWith('CN=') ? publisher : `CN=${publisher}`)}"
+        Version="${xmlSafeString(version)}"
+        Uri="${xmlSafeString(MSIXURL)}" />
     <UpdateSettings>
         <OnLaunch HoursBetweenUpdateChecks="12" />
     </UpdateSettings>
     <UpdateUris>
-        <UpdateUri>${MSIXURL}</UpdateUri>
+        <UpdateUri>${xmlSafeString(MSIXURL)}</UpdateUri>
     </UpdateUris>
     <RepairUris>
-        <RepairUri>${MSIXURL}</RepairUri>
+        <RepairUri>${xmlSafeString(MSIXURL)}</RepairUri>
     </RepairUris>
 </AppInstaller>`
 }
@@ -247,7 +238,7 @@ export const makeAppInstaller = async (
   await fs.ensureDir(outPath)
   const outFilePath = path.join(
     outPath,
-    `${manifestConfig.appName}-${manifestConfig.architecture}.AppInstaller`
+    `${xmlSafeString(manifestConfig.appName)}-${xmlSafeString(manifestConfig.architecture)}.AppInstaller`
   )
 
   if (manifestConfig.baseDownloadURL) {

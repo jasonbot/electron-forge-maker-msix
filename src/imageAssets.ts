@@ -1,7 +1,7 @@
 import fs from 'fs-extra'
 import path from 'node:path'
 import Sharp from 'sharp'
-import type { FileMapping, MakerMSIXConfig } from './types'
+import type { MakerMSIXConfig } from './types'
 
 type ImageDimensions = {
   w: number
@@ -23,8 +23,7 @@ export const makeAppXImages = async (
   appID: string,
   outPath: string,
   config: MakerMSIXConfig
-): Promise<FileMapping> => {
-  const fileMapping: FileMapping = {}
+): Promise<void> => {
   const assetPath = path.join(outPath, 'assets')
   await fs.ensureDir(assetPath)
   for (const scale of REQUIRED_APPX_SCALES) {
@@ -41,7 +40,6 @@ export const makeAppXImages = async (
 
       const imageNamewithScale = `${baseName}.scale-${scale}.png`
       const pathOnDiskWithScale = path.join(path.join(assetPath, imageNamewithScale))
-      const pathinManifestwithScale = path.join('assets', imageNamewithScale)
 
       const image = Sharp(config.appIcon)
       // Small touch: superimpose the app icon on a background for banner-sized images
@@ -70,15 +68,10 @@ export const makeAppXImages = async (
 
       if (scale === 100) {
         const imageName = `${baseName}.png`
-        const pathinManifestWithoutScale = path.join('assets', imageName)
         const pathOnDiskWithoutScale = path.join(path.join(assetPath, imageName))
 
         await fs.copyFile(pathOnDiskWithScale, pathOnDiskWithoutScale)
-        fileMapping[pathinManifestWithoutScale] = pathOnDiskWithoutScale
       }
-      fileMapping[pathinManifestwithScale] = pathOnDiskWithScale
     }
   }
-
-  return fileMapping
 }

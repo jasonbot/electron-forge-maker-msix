@@ -1,4 +1,5 @@
 import type { SignOptions } from '@electron/windows-sign'
+import type { MacOSProtocol } from '@electron/packager/dist/types'
 
 export type MSIXCodesignOptions = Omit<SignOptions, 'appDirectory' | 'hashes'>
 
@@ -23,10 +24,6 @@ export type MSIXAppManifestMetadata = {
   version: string
   executable: string
   architecture: string
-  protocols?: string[]
+  protocols?: MacOSProtocol[]
   baseDownloadURL?: string
 }
-
-export type PathInManifest = string
-export type PathOnDisk = string
-export type FileMapping = Record<PathInManifest, PathOnDisk>
