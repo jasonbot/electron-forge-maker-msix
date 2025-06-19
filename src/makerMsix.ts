@@ -97,7 +97,7 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
     if (this.config.publisher) {
       publisher = this.config.publisher
     } else {
-      publisher = await getPublisher(executable, this.config)
+      publisher = await getPublisher(path.join(scratchPath, executable), this.config)
     }
 
     const manifestConfig = makeManifestConfiguration(
