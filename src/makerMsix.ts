@@ -2,7 +2,7 @@ import { MakerBase, type MakerOptions } from '@electron-forge/maker-base'
 import type { ForgePlatform } from '@electron-forge/shared-types'
 import fs from 'fs-extra'
 import path from 'node:path'
-import { makeAppXImages } from './imageAssets'
+import { makeAppXImages as makeMSIXImageTiles } from './imageAssets'
 import {
   getPublisher,
   makeAppInstaller,
@@ -88,7 +88,7 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
     const executable = await findMainExecutable(scratchPath)
 
     // Generate images for various tile sizes
-    await makeAppXImages(appID, scratchPath, this.config)
+    await makeMSIXImageTiles(appID, scratchPath, this.config)
 
     // Actual AppxManifest.xml, the orchestration layer
 
@@ -111,8 +111,8 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
       options
     )
 
+    const appInstallerPath = await makeAppInstaller(outPath, scratchPath, manifestConfig)
     await makeAppManifest(scratchPath, manifestConfig)
-    const appInstallerPath = await makeAppInstaller(outPath, manifestConfig)
     await makePRI(scratchPath, this.config)
     await writeContentTypeXML(scratchPath)
 

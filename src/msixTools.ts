@@ -77,6 +77,8 @@ const makeAppManifestXML = ({
   publisher,
   version,
   protocols,
+  embedAppInstaller,
+  appInstallerFilename,
 }: MSIXAppManifestMetadata): string => {
   let extensions = `
         <desktop:Extension
@@ -94,6 +96,14 @@ const makeAppManifestXML = ({
           </uap3:AppExecutionAlias>
         </uap3:Extension>
 `
+
+  let autoUpdateXML = ''
+  if (embedAppInstaller) {
+    autoUpdateXML += `<uap13:AutoUpdate>
+        <uap13:AppInstaller File="${xmlSafeString(appInstallerFilename)}" />
+    </uap13:AutoUpdate>
+`
+  }
 
   if (protocols) {
     for (const protocolGroup of protocols) {
@@ -113,6 +123,7 @@ const makeAppManifestXML = ({
     xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
     xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
     xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
+        xmlns:uap13="http://schemas.microsoft.com/appx/manifest/uap/windows10/13" 
     xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
     xmlns:desktop2="http://schemas.microsoft.com/appx/manifest/desktop/windows10/2"
     xmlns:desktop7="http://schemas.microsoft.com/appx/manifest/desktop/windows10/7"
@@ -129,6 +140,7 @@ const makeAppManifestXML = ({
         <uap10:PackageIntegrity>
             <uap10:Content Enforcement="on" />
         </uap10:PackageIntegrity>
+        ${autoUpdateXML}
     </Properties>
     <Resources>
         <Resource Language="en-us" />
@@ -173,6 +185,10 @@ export const makeManifestConfiguration = (
   config: MakerMSIXConfig & Required<Pick<MakerMSIXConfig, 'publisher'>>,
   options: MakerOptions
 ): MSIXAppManifestMetadata => {
+  if (!config.baseDownloadURL && (config.embedAppInstaller ?? true)) {
+    throw new Error("Can't create an appinstaller file without a base URL for download")
+  }
+
   return {
     appID,
     appName: options.appName,
@@ -183,6 +199,8 @@ export const makeManifestConfiguration = (
     publisher: config.publisher,
     protocols: options.forgeConfig.packagerConfig.protocols,
     baseDownloadURL: config.baseDownloadURL,
+    appInstallerFilename: `${options.appName}-${options.targetArch}.appinstaller`,
+    embedAppInstaller: config.embedAppInstaller ?? !!config.baseDownloadURL,
   }
 }
 
@@ -199,15 +217,20 @@ export const makeAppManifest = async (
 
 export const makeAppInstallerXML = ({
   appName,
-  publisher,
   architecture,
+  publisher,
   version,
   baseDownloadURL,
+  appInstallerFilename,
 }: MSIXAppManifestMetadata) => {
   const MSIXURL = `${baseDownloadURL?.replace(
     /\/+$/,
     ''
   )}/${xmlSafeString(appName)}-${xmlSafeString(architecture)}-${xmlSafeString(version)}.msix`
+  const appInstallerURL = `${baseDownloadURL?.replace(
+    /\/+$/,
+    ''
+  )}/${xmlSafeString(appInstallerFilename)}`
 
   return `<?xml version="1.0" encoding="utf-8"?>
 <AppInstaller
@@ -223,27 +246,27 @@ export const makeAppInstallerXML = ({
         <OnLaunch HoursBetweenUpdateChecks="12" />
     </UpdateSettings>
     <UpdateUris>
-        <UpdateUri>${xmlSafeString(MSIXURL)}</UpdateUri>
+        <UpdateUri>${xmlSafeString(appInstallerURL)}</UpdateUri>
     </UpdateUris>
     <RepairUris>
-        <RepairUri>${xmlSafeString(MSIXURL)}</RepairUri>
+        <RepairUri>${xmlSafeString(appInstallerURL)}</RepairUri>
     </RepairUris>
 </AppInstaller>`
 }
 
 export const makeAppInstaller = async (
   outPath: string,
+  inBundlePath: string,
   manifestConfig: MSIXAppManifestMetadata
 ): Promise<string | undefined> => {
   await fs.ensureDir(outPath)
-  const outFilePath = path.join(
-    outPath,
-    `${xmlSafeString(manifestConfig.appName)}-${xmlSafeString(manifestConfig.architecture)}.AppInstaller`
-  )
+  const outFilePath = path.join(outPath, manifestConfig.appInstallerFilename)
+  const embedFilePath = path.join(inBundlePath, manifestConfig.appInstallerFilename)
 
   if (manifestConfig.baseDownloadURL) {
     const outXML = makeAppInstallerXML(manifestConfig)
     await fs.writeFile(outFilePath, outXML)
+    await fs.writeFile(embedFilePath, outXML)
     return outFilePath
   }
 }

@@ -14,6 +14,7 @@ export type MakerMSIXConfig = {
   sigCheckPath?: string
   codesign?: MSIXCodesignOptions
   baseDownloadURL?: string
+  embedAppInstaller?: boolean
 }
 
 export type MSIXAppManifestMetadata = {
@@ -24,6 +25,8 @@ export type MSIXAppManifestMetadata = {
   version: string
   executable: string
   architecture: string
+  appInstallerFilename: string
+  embedAppInstaller: boolean
   protocols?: MacOSProtocol[]
   baseDownloadURL?: string
 }
