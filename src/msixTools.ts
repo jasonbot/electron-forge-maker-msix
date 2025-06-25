@@ -43,6 +43,7 @@ export const writeContentTypeXML = async (outPath: string): Promise<void> => {
     <Default Extension="node" ContentType="application/octet-stream" />
     <Default Extension="exe" ContentType="application/x-msdownload" />
     <Default Extension="pri" ContentType="application/octet-stream" />
+    <Default Extension="appinstaller" ContentType="application/appinstaller" />
     <Override PartName="/AppxManifest.xml" ContentType="application/vnd.ms-appx.manifest+xml" />
     <Override PartName="/AppxBlockMap.xml" ContentType="application/vnd.ms-appx.blockmap+xml" />
     <Override PartName="/AppxSignature.p7x" ContentType="application/vnd.ms-appx.signature" />
@@ -226,11 +227,9 @@ export const makeAppInstallerXML = ({
   msixFilename,
   appInstallerFilename,
 }: MSIXAppManifestMetadata) => {
-  const MSIXURL = `${baseDownloadURL?.replace(/\/+$/, '')}/${xmlSafeString(msixFilename)}`
-  const appInstallerURL = `${baseDownloadURL?.replace(
-    /\/+$/,
-    ''
-  )}/${xmlSafeString(appInstallerFilename)}`
+  const base = baseDownloadURL?.replace(/\/+$/, '')
+  const MSIXURL = `${base}/${xmlSafeString(msixFilename)}`
+  const appInstallerURL = `${base}/${xmlSafeString(appInstallerFilename)}`
 
   return `<?xml version="1.0" encoding="utf-8"?>
 <AppInstaller
