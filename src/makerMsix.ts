@@ -116,10 +116,7 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
     await makePRI(scratchPath, this.config)
     await writeContentTypeXML(scratchPath)
 
-    const outMSIX = path.join(
-      outPath,
-      `${options.appName}-${options.targetArch}-${manifestConfig.version}.msix`
-    )
+    const outMSIX = path.join(outPath, manifestConfig.msixFilename)
     await makeMSIX(scratchPath, outMSIX, this.config)
 
     return [outMSIX, appInstallerPath].filter((filename) => filename !== undefined)

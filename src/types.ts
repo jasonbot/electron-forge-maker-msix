@@ -26,6 +26,7 @@ export type MSIXAppManifestMetadata = {
   executable: string
   architecture: string
   appInstallerFilename: string
+  msixFilename: string
   embedAppInstaller: boolean
   protocols?: MacOSProtocol[]
   baseDownloadURL?: string
