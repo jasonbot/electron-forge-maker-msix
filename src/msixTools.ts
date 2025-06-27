@@ -186,7 +186,7 @@ export const makeManifestConfiguration = (
   config: MakerMSIXConfig & Required<Pick<MakerMSIXConfig, 'publisher'>>,
   options: MakerOptions
 ): MSIXAppManifestMetadata => {
-  if (!config.baseDownloadURL && (config.embedAppInstaller ?? true)) {
+  if (!config.baseDownloadURL && config.embedAppInstaller) {
     throw new Error("Can't create an appinstaller file without a base URL for download")
   }
 
