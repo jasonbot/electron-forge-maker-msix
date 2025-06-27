@@ -17,7 +17,7 @@ export const run = async (executable: string, args: Array<string>, neverFail = f
       if (runningStdout.includes('\n')) {
         const logLines = runningStdout.split('\n')
         while (logLines.length > 1) {
-          log(`stdout: ${logLines.shift()?.trimEnd()}`)
+          log(`stdout: ${logLines.shift()?.trimEnd().replace(/\0/g, '')}`)
         }
         if (logLines.length > 0) {
           runningStdout = logLines[0]
@@ -32,7 +32,7 @@ export const run = async (executable: string, args: Array<string>, neverFail = f
       if (runningStderr.includes('\n')) {
         const logLines = runningStderr.split('\n')
         while (logLines.length > 1) {
-          log(`stderr: ${logLines.shift()?.trimEnd()}`)
+          log(`stderr: ${logLines.shift()?.trimEnd().replace(/\0/g, '')}`)
         }
         if (logLines.length > 0) {
           runningStderr = logLines[0]
@@ -41,8 +41,12 @@ export const run = async (executable: string, args: Array<string>, neverFail = f
     })
 
     proc.on('exit', (code) => {
-      runningStdout.split('\n').forEach((line) => log(`stdout: ${line.trimEnd()}`))
-      runningStderr.split('\n').forEach((line) => log(`stderr: ${line.trimEnd()}`))
+      runningStdout
+        .split('\n')
+        .forEach((line) => log(`stdout: ${line.trimEnd().replace(/\0/g, '')}`))
+      runningStderr
+        .split('\n')
+        .forEach((line) => log(`stderr: ${line.trimEnd().replace(/\0/g, '')}`))
       if (code !== 0) {
         if (neverFail) {
           log(`warning: ${executable} returned: ${code}`)

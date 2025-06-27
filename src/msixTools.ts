@@ -15,14 +15,19 @@ export const makePRI = async (outPath: string, config: MakerMSIXConfig): Promise
   await run(makePRIPath, ['new', '/pr', outPath, '/cf', priConfigPath, '/of', outPriPath])
 }
 
+const ENTITY_REPLACEMENTS: [RegExp, string][] = [
+  [/[&]/g, '&amp;'],
+  [/["]/g, '&quot;'],
+  [/[<]/g, '&lt;'],
+  [/[>]/g, '&gt;'],
+]
+
 const xmlSafeString = (input: string | undefined): string | undefined =>
   input &&
-  [
-    ['&', '&amp;'],
-    ['"', '&quot;'],
-    ['<', '&lt;'],
-    ['>', '&gt;'],
-  ].reduce((input, [fromString, toNewString]) => input.replace(fromString, toNewString), input)
+  ENTITY_REPLACEMENTS.reduce(
+    (input, [fromString, toNewString]) => input.replace(fromString, toNewString),
+    input
+  )
 
 export const writeContentTypeXML = async (outPath: string): Promise<void> => {
   const fileName = '[Content_Types].xml'
@@ -216,7 +221,7 @@ export const makeAppManifest = async (
   const outFilePath = path.join(outPath, 'AppxManifest.xml')
   const manifestXML = makeAppManifestXML(manifestConfig)
   log(`Writing manifest to: ${outPath}`)
-  log(`Manifest XML: ${JSON.stringify(manifestXML)}`)
+  log(`Manifest XML: ${JSON.stringify(outFilePath)}`)
 
   fs.writeFile(outFilePath, manifestXML)
 }

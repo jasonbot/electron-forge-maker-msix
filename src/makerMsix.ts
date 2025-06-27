@@ -65,7 +65,7 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
       this.config.internalAppID ??
       options.appName
         .toUpperCase()
-        .replace(/[^A-Z]/, '')
+        .replace(/[^A-Z]/g, '')
         .slice(0, 10)
 
     // Copy out files to scratch directory for signing/packaging
