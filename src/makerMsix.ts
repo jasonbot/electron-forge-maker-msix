@@ -111,8 +111,8 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
       options
     )
 
-    const appInstallerPath = await makeAppInstaller(outPath, scratchPath, manifestConfig)
     await makeAppManifest(scratchPath, manifestConfig)
+    const appInstallerPath = await makeAppInstaller(outPath, scratchPath, manifestConfig)
     await makePRI(scratchPath, this.config)
     await writeContentTypeXML(scratchPath)
 

@@ -1,7 +1,7 @@
 import type { MakerOptions } from '@electron-forge/maker-base'
 import fs from 'fs-extra'
 import path from 'node:path'
-import { run } from './run'
+import { log, run } from './run'
 import type { MakerMSIXConfig, MSIXAppManifestMetadata } from './types'
 import { findInWindowsKits } from './walk'
 
@@ -147,7 +147,7 @@ const makeAppManifestXML = ({
         <Resource Language="en-us" />
     </Resources>
     <Dependencies>
-        <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.17763.0" />
+        <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.21300.0" />
     </Dependencies>
     <Capabilities>
         <rescap:Capability Name="runFullTrust" />
@@ -215,6 +215,8 @@ export const makeAppManifest = async (
   await fs.ensureDir(outPath)
   const outFilePath = path.join(outPath, 'AppxManifest.xml')
   const manifestXML = makeAppManifestXML(manifestConfig)
+  log(`Writing manifest to: ${outPath}`)
+  log(`Manifest XML: ${JSON.stringify(manifestXML)}`)
 
   fs.writeFile(outFilePath, manifestXML)
 }
