@@ -1,7 +1,7 @@
 import type { MakerOptions } from '@electron-forge/maker-base'
 import fs from 'fs-extra'
 import path from 'node:path'
-import { log, run } from './run'
+import { run } from './run'
 import type { MakerMSIXConfig, MSIXAppManifestMetadata } from './types'
 import { findInWindowsKits } from './walk'
 
@@ -220,8 +220,6 @@ export const makeAppManifest = async (
   await fs.ensureDir(outPath)
   const outFilePath = path.join(outPath, 'AppxManifest.xml')
   const manifestXML = makeAppManifestXML(manifestConfig)
-  log(`Writing manifest to: ${outFilePath}`)
-  log(`Manifest XML: ${JSON.stringify(manifestXML)}`)
 
   fs.writeFile(outFilePath, manifestXML)
 }
