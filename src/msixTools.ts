@@ -135,7 +135,7 @@ const makeAppManifestXML = ({
     xmlns:desktop7="http://schemas.microsoft.com/appx/manifest/desktop/windows10/7"
     xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
     IgnorableNamespaces="uap uap3 uap10 desktop7 rescap">
-    <Identity Name="${xmlSafeString(appName)}" Publisher="${xmlSafeString(
+    <Identity Name="${xmlSafeString(appID)}" Publisher="${xmlSafeString(
       publisher.startsWith('CN=') ? publisher : `CN=${publisher}`
     )}" Version="${xmlSafeString(version)}" ProcessorArchitecture="${xmlSafeString(architecture)}" />
     <Properties>
