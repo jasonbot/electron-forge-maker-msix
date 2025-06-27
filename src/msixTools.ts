@@ -135,9 +135,9 @@ const makeAppManifestXML = ({
     xmlns:desktop7="http://schemas.microsoft.com/appx/manifest/desktop/windows10/7"
     xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
     IgnorableNamespaces="uap uap3 uap10 desktop7 rescap">
-    <Identity Name="${xmlSafeString(publisher)}" Publisher="${
-      publisher.startsWith('CN=') ? publisher : `CN=${xmlSafeString(publisher)}`
-    }" Version="${xmlSafeString(version)}" ProcessorArchitecture="${xmlSafeString(architecture)}" />
+    <Identity Name="${xmlSafeString(appName)}" Publisher="${xmlSafeString(
+      publisher.startsWith('CN=') ? publisher : `CN=${publisher}`
+    )}" Version="${xmlSafeString(version)}" ProcessorArchitecture="${xmlSafeString(architecture)}" />
     <Properties>
         <DisplayName>${xmlSafeString(appName)}</DisplayName>
         <PublisherDisplayName>${xmlSafeString(appName)}</PublisherDisplayName>
@@ -220,8 +220,8 @@ export const makeAppManifest = async (
   await fs.ensureDir(outPath)
   const outFilePath = path.join(outPath, 'AppxManifest.xml')
   const manifestXML = makeAppManifestXML(manifestConfig)
-  log(`Writing manifest to: ${outPath}`)
-  log(`Manifest XML: ${JSON.stringify(outFilePath)}`)
+  log(`Writing manifest to: ${outFilePath}`)
+  log(`Manifest XML: ${JSON.stringify(manifestXML)}`)
 
   fs.writeFile(outFilePath, manifestXML)
 }
