@@ -12,7 +12,7 @@ export const makePRI = async (outPath: string, config: MakerMSIXConfig): Promise
   const priConfigPath = path.join(outPath, 'priconfig.xml')
 
   await run(makePRIPath, ['createconfig', '/cf', priConfigPath, '/dq', 'en-US', '/pv', '10.0.0'])
-  await run(makePRIPath, ['new', '/cf', priConfigPath, '/pr', outPath, '/of', outPriPath])
+  await run(makePRIPath, ['new', '/pr', outPath, '/cf', priConfigPath, '/of', outPriPath])
 }
 
 const xmlSafeString = (input: string | undefined): string | undefined =>
