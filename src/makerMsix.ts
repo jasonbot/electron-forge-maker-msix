@@ -102,7 +102,7 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
 
     const manifestConfig = makeManifestConfiguration({
       appID,
-      version: options.packageJSON.version,
+      version: options.forgeConfig.packagerConfig.appVersion ?? options.packageJSON.version,
       executable,
       config: {
         ...this.config,

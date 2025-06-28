@@ -29,6 +29,12 @@ const xmlSafeString = (input: string | undefined): string | undefined =>
     input
   )
 
+const msixSafeVersion = (inVersion: string): string =>
+  Array.from(inVersion.match(/\d+/g) || [])
+    .concat(['0', '0', '0', '0'])
+    .slice(0, 4)
+    .join('.')
+
 export const writeContentTypeXML = async (outPath: string): Promise<void> => {
   const fileName = '[Content_Types].xml'
   const outFileName = path.join(outPath, fileName)
@@ -137,7 +143,7 @@ const makeAppManifestXML = ({
     IgnorableNamespaces="uap uap3 uap10 desktop7 rescap">
     <Identity Name="${xmlSafeString(appID)}" Publisher="${xmlSafeString(
       publisher.startsWith('CN=') ? publisher : `CN=${publisher}`
-    )}" Version="${xmlSafeString(version)}" ProcessorArchitecture="${xmlSafeString(architecture)}" />
+    )}" Version="${xmlSafeString(msixSafeVersion(version))}" ProcessorArchitecture="${xmlSafeString(architecture)}" />
     <Properties>
         <DisplayName>${xmlSafeString(appName)}</DisplayName>
         <PublisherDisplayName>${xmlSafeString(appName)}</PublisherDisplayName>
@@ -227,12 +233,6 @@ export const makeAppManifest = async (
 
   fs.writeFile(outFilePath, manifestXML)
 }
-
-const msixSafeVersion = (inVersion: string): string =>
-  Array.from(inVersion.match(/\d+/g) || [])
-    .concat(['0', '0', '0', '0'])
-    .slice(0, 4)
-    .join('.')
 
 export const makeAppInstallerXML = ({
   appName,
