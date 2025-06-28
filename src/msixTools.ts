@@ -184,13 +184,19 @@ const makeAppManifestXML = ({
 </Package>`.trim()
 }
 
-export const makeManifestConfiguration = (
-  appID: string,
-  version: string,
-  executable: string,
-  config: MakerMSIXConfig & Required<Pick<MakerMSIXConfig, 'publisher'>>,
+export const makeManifestConfiguration = ({
+  appID,
+  version,
+  executable,
+  config,
+  options,
+}: {
+  appID: string
+  version: string
+  executable: string
+  config: MakerMSIXConfig & Required<Pick<MakerMSIXConfig, 'publisher'>>
   options: MakerOptions
-): MSIXAppManifestMetadata => {
+}): MSIXAppManifestMetadata => {
   if (!config.baseDownloadURL && config.embedAppInstaller) {
     throw new Error("Can't create an appinstaller file without a base URL for download")
   }

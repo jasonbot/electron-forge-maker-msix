@@ -100,16 +100,16 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
       publisher = await getPublisher(path.join(scratchPath, executable), this.config)
     }
 
-    const manifestConfig = makeManifestConfiguration(
+    const manifestConfig = makeManifestConfiguration({
       appID,
-      options.packageJSON.version,
+      version: options.packageJSON.version,
       executable,
-      {
+      config: {
         ...this.config,
         publisher,
       },
-      options
-    )
+      options,
+    })
 
     await makeAppManifest(scratchPath, manifestConfig)
     const appInstallerPath = await makeAppInstaller(outPath, scratchPath, manifestConfig)
