@@ -228,6 +228,12 @@ export const makeAppManifest = async (
   fs.writeFile(outFilePath, manifestXML)
 }
 
+const msixSafeVersion = (inVersion: string): string =>
+  Array.from(inVersion.match(/\d+/g) || [])
+    .concat(['0', '0', '0', '0'])
+    .slice(0, 4)
+    .join('.')
+
 export const makeAppInstallerXML = ({
   appName,
   publisher,
@@ -248,7 +254,7 @@ export const makeAppInstallerXML = ({
     <MainBundle
         Name="${xmlSafeString(appName)}"
         Publisher="${xmlSafeString(publisher.startsWith('CN=') ? publisher : `CN=${publisher}`)}"
-        Version="${xmlSafeString(version)}"
+        Version="${xmlSafeString(msixSafeVersion(version))}"
         Uri="${xmlSafeString(MSIXURL)}" />
     <UpdateSettings>
         <OnLaunch HoursBetweenUpdateChecks="12" />
