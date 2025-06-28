@@ -195,19 +195,17 @@ export const makeManifestConfiguration = (
     throw new Error("Can't create an appinstaller file without a base URL for download")
   }
 
-  const versionString = version.split('.').concat(['0', '0', '0', '0']).slice(0, 4).join('.')
-
   return {
     appID,
     appName: options.appName,
     appDescription: config.appDescription ?? options.appName,
     executable,
     architecture: options.targetArch,
-    version: versionString,
+    version,
     publisher: config.publisher,
     protocols: options.forgeConfig.packagerConfig.protocols,
     baseDownloadURL: config.baseDownloadURL,
-    msixFilename: `${options.appName}-${options.targetArch}-${versionString}.msix`,
+    msixFilename: `${options.appName}-${options.targetArch}-${version}.msix`,
     appInstallerFilename: `${options.appName}-${options.targetArch}.appinstaller`,
     embedAppInstaller: config.embedAppInstaller ?? !!config.baseDownloadURL,
   }
