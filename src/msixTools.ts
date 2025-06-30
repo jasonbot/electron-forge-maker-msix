@@ -2,7 +2,7 @@ import type { MakerOptions } from '@electron-forge/maker-base'
 import fs from 'fs-extra'
 import path from 'node:path'
 import { run } from './run'
-import type { MakerMSIXConfig, MSIXAppManifestMetadata } from './types'
+import type { AppCapability, MakerMSIXConfig, MSIXAppManifestMetadata } from './types'
 import { findInWindowsKits } from './walk'
 
 export const makePRI = async (outPath: string, config: MakerMSIXConfig): Promise<void> => {
@@ -80,6 +80,12 @@ export const getPublisher = async (
   }
 }
 
+const CapabilityMap: Record<AppCapability, string> = {
+  GraphicsCapture: '<uap6:Capability Name="graphicsCapture" />',
+  Microphone: '<DeviceCapability Name="microphone" />',
+  Webcam: '<DeviceCapability Name="webcam"/>',
+}
+
 const makeAppManifestXML = ({
   appID,
   appName,
@@ -89,6 +95,8 @@ const makeAppManifestXML = ({
   publisher,
   version,
   protocols,
+  appCapabilities,
+  copilotKey,
   embedAppInstaller,
   appInstallerFilename,
 }: MSIXAppManifestMetadata): string => {
@@ -117,6 +125,13 @@ const makeAppManifestXML = ({
 `
   }
 
+  let additionalCapabilities = ''
+  if (appCapabilities) {
+    additionalCapabilities += [...new Set(appCapabilities)]
+      .map((cap) => CapabilityMap[cap])
+      .filter((cv) => !!cv)
+  }
+
   if (protocols) {
     for (const protocolGroup of protocols) {
       for (const protocol of protocolGroup.schemes) {
@@ -130,10 +145,40 @@ const makeAppManifestXML = ({
     }
   }
 
+  if (copilotKey) {
+    const tapString = copilotKey.tap
+      ? `<SingleTap ${copilotKey.tap.wparam ? `MessageWParam="${xmlSafeString(copilotKey.tap.wparam.toString())}"` : ''}>${xmlSafeString(copilotKey.tap.url)}</SingleTap>`
+      : ''
+    const startString = copilotKey.start
+      ? `<PressAndHoldStart ${copilotKey.start.wparam ? `MessageWParam="${xmlSafeString(copilotKey.start.wparam.toString())}"` : ''}>${xmlSafeString(copilotKey.start.url)}</PressAndHoldStart>`
+      : ''
+
+    const stopString = copilotKey.stop
+      ? `<PressAndHoldStop ${copilotKey.stop.wparam ? `MessageWParam="${xmlSafeString(copilotKey.stop.wparam.toString())}"` : ''}>${xmlSafeString(copilotKey.stop.url)}</PressAndHoldStop>`
+      : ''
+
+    extensions += `
+              <uap3:Extension Category="windows.appExtension">
+                <uap3:AppExtension Name="com.microsoft.windows.copilotkeyprovider"
+                    DisplayName="${appName} - Copilot Key"
+                    Id="CopilotNativeApp"
+                    Description="${appDescription}"
+                    PublicFolder="Public">
+                    <uap3:Properties>
+                        ${tapString}
+                        ${startString}
+                        ${stopString}
+                    </uap3:Properties>
+                </uap3:AppExtension>
+              </uap3:Extension>
+`
+  }
+
   return `<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
     xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
     xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+    xmlns:uap6="http://schemas.microsoft.com/appx/manifest/uap/windows10/6"
     xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
         xmlns:uap13="http://schemas.microsoft.com/appx/manifest/uap/windows10/13" 
     xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
@@ -163,6 +208,7 @@ const makeAppManifestXML = ({
     <Capabilities>
         <rescap:Capability Name="runFullTrust" />
         <Capability Name="internetClient" />
+        ${additionalCapabilities}
     </Capabilities>
     <Applications>
         <Application Id="${xmlSafeString(appID)}" Executable="${xmlSafeString(executable)}"
@@ -219,6 +265,8 @@ export const makeManifestConfiguration = ({
     baseDownloadURL: config.baseDownloadURL,
     msixFilename: `${options.appName}-${options.targetArch}-${version}.msix`,
     appInstallerFilename: `${options.appName}-${options.targetArch}.appinstaller`,
+    appCapabilities: config.appCapabilities,
+    copilotKey: config.copilotKey,
     embedAppInstaller: config.embedAppInstaller ?? !!config.baseDownloadURL,
   }
 }

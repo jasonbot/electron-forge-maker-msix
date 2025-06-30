@@ -3,6 +3,17 @@ import type { MacOSProtocol } from '@electron/packager/dist/types'
 
 export type MSIXCodesignOptions = Omit<SignOptions, 'appDirectory' | 'hashes'>
 
+export type CopilotKeyAction = 'tap' | 'start' | 'stop'
+
+export type CopilotKeyURIAndWParam = {
+  url: string
+  wparam?: number
+}
+
+export type CopilotKeyConfiguration = Record<CopilotKeyAction, CopilotKeyURIAndWParam>
+
+export type AppCapability = 'GraphicsCapture' | 'Microphone' | 'Webcam'
+
 export type MakerMSIXConfig = {
   appIcon: string
   publisher?: string
@@ -14,6 +25,8 @@ export type MakerMSIXConfig = {
   sigCheckPath?: string
   codesign?: MSIXCodesignOptions
   baseDownloadURL?: string
+  copilotKey?: CopilotKeyConfiguration
+  appCapabilities?: AppCapability[]
   embedAppInstaller?: boolean
 }
 
@@ -27,7 +40,9 @@ export type MSIXAppManifestMetadata = {
   architecture: string
   appInstallerFilename: string
   msixFilename: string
-  embedAppInstaller: boolean
   protocols?: MacOSProtocol[]
   baseDownloadURL?: string
+  copilotKey?: CopilotKeyConfiguration
+  appCapabilities?: AppCapability[]
+  embedAppInstaller: boolean
 }
