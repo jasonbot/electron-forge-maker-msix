@@ -292,7 +292,8 @@ export const makeAppInstallerXML = ({
 }: MSIXAppManifestMetadata) => {
   const base = baseDownloadURL?.replace(/\/+$/, '')
   const MSIXURL = `${base}/${xmlSafeString(msixFilename)}`
-  const appInstallerURL = `${base}/${xmlSafeString(appInstallerFilename)}`
+  // Go round trip through URL class to escape spaces etc
+  const appInstallerURL = new URL(`${base}/${appInstallerFilename}`).toString()
 
   return `<?xml version="1.0" encoding="utf-8"?>
 <AppInstaller
