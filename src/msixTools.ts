@@ -145,7 +145,11 @@ const makeAppManifestXML = ({
     }
   }
 
+  let minVersionTested = '10.0.17763.0'
+  let maxVersionTested = '10.0.21300.0'
+
   if (copilotKey) {
+    ;[minVersionTested, maxVersionTested] = ['10.0.19041.0', '10.0.22621.0']
     const tapString = copilotKey.tap
       ? `<SingleTap ${copilotKey.tap.wparam ? `MessageWParam="${xmlSafeString(copilotKey.tap.wparam.toString())}"` : ''}>${xmlSafeString(copilotKey.tap.url)}</SingleTap>`
       : ''
@@ -203,7 +207,7 @@ const makeAppManifestXML = ({
         <Resource Language="en-us" />
     </Resources>
     <Dependencies>
-        <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.21300.0" />
+        <TargetDeviceFamily Name="Windows.Desktop" MinVersion="${xmlSafeString(minVersionTested)}" MaxVersionTested="${xmlSafeString(maxVersionTested)}" />
     </Dependencies>
     <Capabilities>
         <rescap:Capability Name="runFullTrust" />
