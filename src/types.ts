@@ -27,7 +27,6 @@ export type MakerMSIXConfig = {
   baseDownloadURL?: string
   copilotKey?: CopilotKeyConfiguration
   appCapabilities?: AppCapability[]
-  embedAppInstaller?: boolean
 }
 
 export type MSIXAppManifestMetadata = {
@@ -44,5 +43,4 @@ export type MSIXAppManifestMetadata = {
   baseDownloadURL?: string
   copilotKey?: CopilotKeyConfiguration
   appCapabilities?: AppCapability[]
-  embedAppInstaller: boolean
 }
