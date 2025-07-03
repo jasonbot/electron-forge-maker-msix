@@ -97,7 +97,7 @@ const makeAppManifestXML = ({
   protocols,
   appCapabilities,
   copilotKey,
-  embedAppInstaller,
+  baseDownloadURL,
   appInstallerFilename,
 }: MSIXAppManifestMetadata): string => {
   let extensions = `
@@ -118,7 +118,7 @@ const makeAppManifestXML = ({
 `
 
   let autoUpdateXML = ''
-  if (embedAppInstaller) {
+  if (baseDownloadURL) {
     autoUpdateXML += `<uap13:AutoUpdate>
         <uap13:AppInstaller File="${xmlSafeString(appInstallerFilename)}" />
     </uap13:AutoUpdate>
@@ -249,10 +249,6 @@ export const makeManifestConfiguration = ({
   config: MakerMSIXConfig & Required<Pick<MakerMSIXConfig, 'publisher'>>
   options: MakerOptions
 }): MSIXAppManifestMetadata => {
-  if (!config.baseDownloadURL && config.embedAppInstaller) {
-    throw new Error("Can't create an appinstaller file without a base URL for download")
-  }
-
   return {
     appID,
     appName: options.appName,
@@ -267,7 +263,6 @@ export const makeManifestConfiguration = ({
     appInstallerFilename: `${options.appName}-${options.targetArch}.appinstaller`,
     appCapabilities: config.appCapabilities,
     copilotKey: config.copilotKey,
-    embedAppInstaller: config.embedAppInstaller ?? !!config.baseDownloadURL,
   }
 }
 
