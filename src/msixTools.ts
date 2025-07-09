@@ -158,7 +158,10 @@ const makeAppManifestXML = ({
   let maxVersionTested = '10.0.21300.0'
 
   if (copilotKey) {
-    ;[minVersionTested, maxVersionTested] = ['10.0.19041.0', '10.0.22621.0']
+    // Version range to enable this is later
+    minVersionTested = '10.0.19041.0'
+    maxVersionTested = '10.0.22621.0'
+
     const tapString = copilotKey.tap
       ? `<SingleTap ${copilotKey.tap.wparam ? `MessageWParam="${xmlSafeString(copilotKey.tap.wparam.toString())}"` : ''}>${xmlSafeString(copilotKey.tap.url)}</SingleTap>`
       : ''
