@@ -99,14 +99,23 @@ const makeAppManifestXML = ({
   copilotKey,
   baseDownloadURL,
   appInstallerFilename,
+  runAtStartup,
+  startupParams,
 }: MSIXAppManifestMetadata): string => {
-  let extensions = `
+  const startupExtension = runAtStartup
+    ? `
         <desktop:Extension
           Category="windows.startupTask"
           Executable="${xmlSafeString(executable)}"
+          ${startupParams ? `uap11:Parameters="${xmlSafeString(startupParams)}"` : ''}
           EntryPoint="Windows.FullTrustApplication">
           <desktop:StartupTask TaskId="SlackStartup" Enabled="true" DisplayName="${xmlSafeString(appName)}" />
         </desktop:Extension>
+  `
+    : ''
+
+  let extensions = `
+        ${startupExtension}
         <uap3:Extension
           Category="windows.appExecutionAlias"
           Executable="${xmlSafeString(executable)}"
@@ -184,7 +193,8 @@ const makeAppManifestXML = ({
     xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
     xmlns:uap6="http://schemas.microsoft.com/appx/manifest/uap/windows10/6"
     xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
-        xmlns:uap13="http://schemas.microsoft.com/appx/manifest/uap/windows10/13" 
+    xmlns:uap11="http://schemas.microsoft.com/appx/manifest/uap/windows10/11"
+    xmlns:uap13="http://schemas.microsoft.com/appx/manifest/uap/windows10/13" 
     xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
     xmlns:desktop2="http://schemas.microsoft.com/appx/manifest/desktop/windows10/2"
     xmlns:desktop7="http://schemas.microsoft.com/appx/manifest/desktop/windows10/7"
@@ -267,6 +277,9 @@ export const makeManifestConfiguration = ({
     appInstallerFilename: `${options.appName}-${options.targetArch}.appinstaller`,
     appCapabilities: config.appCapabilities,
     copilotKey: config.copilotKey,
+    allowRollbacks: config.allowRollbacks,
+    runAtStartup: !!config.runAtStartup,
+    startupParams: config.startupParams,
   }
 }
 
@@ -288,6 +301,7 @@ export const makeAppInstallerXML = ({
   baseDownloadURL,
   msixFilename,
   appInstallerFilename,
+  allowRollbacks,
 }: MSIXAppManifestMetadata) => {
   const base = baseDownloadURL?.replace(/\/+$/, '')
   const MSIXURL = `${base}/${xmlSafeString(msixFilename)}`
@@ -306,6 +320,7 @@ export const makeAppInstallerXML = ({
         Uri="${xmlSafeString(MSIXURL)}" />
     <UpdateSettings>
         <OnLaunch HoursBetweenUpdateChecks="12" />
+        <ForceUpdateFromAnyVersion>${allowRollbacks ?? true}</ForceUpdateFromAnyVersion>
     </UpdateSettings>
     <UpdateUris>
         <UpdateUri>${xmlSafeString(appInstallerURL)}</UpdateUri>

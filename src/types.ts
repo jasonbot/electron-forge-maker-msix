@@ -27,6 +27,9 @@ export type MakerMSIXConfig = {
   baseDownloadURL?: string
   copilotKey?: CopilotKeyConfiguration
   appCapabilities?: AppCapability[]
+  allowRollbacks?: boolean
+  runAtStartup?: boolean
+  startupParams?: string
 }
 
 export type MSIXAppManifestMetadata = {
@@ -39,8 +42,11 @@ export type MSIXAppManifestMetadata = {
   architecture: string
   appInstallerFilename: string
   msixFilename: string
-  protocols?: MacOSProtocol[]
-  baseDownloadURL?: string
-  copilotKey?: CopilotKeyConfiguration
-  appCapabilities?: AppCapability[]
+  protocols: MacOSProtocol[] | undefined
+  baseDownloadURL: string | undefined
+  copilotKey: CopilotKeyConfiguration | undefined
+  appCapabilities: AppCapability[] | undefined
+  allowRollbacks: boolean | undefined
+  runAtStartup: boolean
+  startupParams: string | undefined
 }
