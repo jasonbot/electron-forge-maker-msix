@@ -39,6 +39,7 @@ const findMainExecutable = async (rootPath: string): Promise<string> => {
 const makeMSIX = async (scratchPath: string, outMSIX: string, config: MakerMSIXConfig) => {
   const makeAppXPath = config.makeAppXPath ?? (await findInWindowsKits('makeappx.exe'))
 
+  await codesign(config, scratchPath)
   try {
     if ((await fs.stat(outMSIX)).isFile()) {
       log(`${outMSIX} already exists; making new one`)
@@ -78,7 +79,6 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
     const programFilesPath = path.join(scratchPath, options.appName)
     await fs.ensureDir(programFilesPath)
     await fs.copy(options.dir, programFilesPath)
-    await codesign(this.config, programFilesPath)
 
     // Make sure the build dir exists
     const outPath = path.join(options.makeDir, `${options.appName}-${options.targetArch}-msix/`)

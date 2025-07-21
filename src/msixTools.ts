@@ -315,7 +315,7 @@ export const makeAppInstallerXML = ({
 <AppInstaller
     xmlns="http://schemas.microsoft.com/appx/appinstaller/2021"
     Version="1.0.0.0"
-    Uri="http://mywebservice.azurewebsites.net/appset.appinstaller" >
+    Uri="${xmlSafeString(appInstallerURL)}" >
     <MainBundle
         Name="${xmlSafeString(appName)}"
         Publisher="${xmlSafeString(publisher.startsWith('CN=') ? publisher : `CN=${publisher}`)}"
