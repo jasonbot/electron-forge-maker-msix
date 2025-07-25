@@ -177,7 +177,7 @@ const makeAppManifestXML = ({
               <uap3:Extension Category="windows.appExtension">
                 <uap3:AppExtension Name="com.microsoft.windows.copilotkeyprovider"
                     DisplayName="${appName} - Copilot Key"
-                    Id="CopilotNativeApp"
+                    Id="${appID}"
                     Description="${appDescription}"
                     PublicFolder="Public">
                     <uap3:Properties>
@@ -298,7 +298,7 @@ export const makeAppManifest = async (
 }
 
 export const makeAppInstallerXML = ({
-  appName,
+  appID,
   publisher,
   version,
   baseDownloadURL,
@@ -317,7 +317,7 @@ export const makeAppInstallerXML = ({
     Version="1.0.0.0"
     Uri="${xmlSafeString(appInstallerURL)}" >
     <MainBundle
-        Name="${xmlSafeString(appName)}"
+        Name="${xmlSafeString(appID)}"
         Publisher="${xmlSafeString(publisher.startsWith('CN=') ? publisher : `CN=${publisher}`)}"
         Version="${xmlSafeString(msixSafeVersion(version))}"
         Uri="${xmlSafeString(MSIXURL)}" />
