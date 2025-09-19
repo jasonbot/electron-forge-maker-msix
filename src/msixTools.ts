@@ -320,7 +320,7 @@ export const makeAppInstallerXML = ({
         Name="${xmlSafeString(appID)}"
         Publisher="${xmlSafeString(publisher.startsWith('CN=') ? publisher : `CN=${publisher}`)}"
         Version="${xmlSafeString(msixSafeVersion(version))}"
-        Uri="${xmlSafeString(MSIXURL)}" />
+        Uri="${xmlSafeString(new URL(MSIXURL).toString())}" />
     <UpdateSettings>
         <OnLaunch HoursBetweenUpdateChecks="12" />
         <ForceUpdateFromAnyVersion>${allowRollbacks ?? true}</ForceUpdateFromAnyVersion>
