@@ -25,6 +25,7 @@ export type MakerMSIXConfig = {
   sigCheckPath?: string
   codesign?: MSIXCodesignOptions
   baseDownloadURL?: string
+  makeAppInstaller?: boolean
   copilotKey?: CopilotKeyConfiguration
   appCapabilities?: AppCapability[]
   allowRollbacks?: boolean
@@ -52,6 +53,7 @@ export type MSIXAppManifestMetadata = {
   msixFilename: string
   protocols: MacOSProtocol[] | undefined
   baseDownloadURL: string | undefined
+  makeAppInstaller: boolean
   copilotKey: CopilotKeyConfiguration | undefined
   appCapabilities: AppCapability[] | undefined
   allowRollbacks: boolean | undefined

@@ -35,7 +35,7 @@ const msixSafeVersion = (inVersion: string): string =>
     .slice(0, 4)
     .join('.')
 
-export const writeContentTypeXML = async (outPath: string): Promise<void> => {
+export const makeContentTypeXML = async (outPath: string): Promise<void> => {
   const fileName = '[Content_Types].xml'
   const outFileName = path.join(outPath, fileName)
   const co = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -54,6 +54,8 @@ export const writeContentTypeXML = async (outPath: string): Promise<void> => {
     <Default Extension="node" ContentType="application/octet-stream" />
     <Default Extension="exe" ContentType="application/x-msdownload" />
     <Default Extension="pri" ContentType="application/octet-stream" />
+    <Default Extension="yml" ContentType="application/yaml" />
+    <Default Extension="yaml" ContentType="application/yaml" />
     <Default Extension="appinstaller" ContentType="application/appinstaller" />
     <Override PartName="/AppxManifest.xml" ContentType="application/vnd.ms-appx.manifest+xml" />
     <Override PartName="/AppxBlockMap.xml" ContentType="application/vnd.ms-appx.blockmap+xml" />
@@ -288,6 +290,7 @@ export const makeManifestConfiguration = ({
     publisher: config.publisher,
     protocols: options.forgeConfig.packagerConfig.protocols,
     baseDownloadURL: config.baseDownloadURL,
+    makeAppInstaller: config.makeAppInstaller ?? true,
     msixFilename: `${options.appName}-${options.targetArch}-${version}.msix`,
     appInstallerFilename: `${options.appName}-${options.targetArch}.appinstaller`,
     appCapabilities: config.appCapabilities,
