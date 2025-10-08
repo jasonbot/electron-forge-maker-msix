@@ -359,7 +359,7 @@ export const makeAppInstaller = async (
   const outFilePath = path.join(outPath, manifestConfig.appInstallerFilename)
   const embedFilePath = path.join(inBundlePath, manifestConfig.appInstallerFilename)
 
-  if (manifestConfig.baseDownloadURL) {
+  if (manifestConfig.makeAppInstaller && manifestConfig.baseDownloadURL) {
     const outXML = makeAppInstallerXML(manifestConfig)
     await fs.writeFile(outFilePath, outXML)
     await fs.writeFile(embedFilePath, outXML)
