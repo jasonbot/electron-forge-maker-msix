@@ -26,7 +26,8 @@
 		"debug": "^4.4.0",
 		"fs-extra": "^11.2.0",
 		"sharp": "^0.34.2",
-		"yarn": "^1.22.22"
+		"yarn": "^1.22.22",
+		"electron-updater-yaml": "^1.1.2"
 	},
 	"devDependencies": {
 		"@types/debug": "^4.1.8",

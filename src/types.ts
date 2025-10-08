@@ -31,6 +31,13 @@ export type MakerMSIXConfig = {
   runAtStartup?: boolean
   startupParams?: string
   appURIHandlers?: string[]
+
+  updater?: {
+    url: string
+    channel?: string
+    updaterCacheDirName?: string
+    publisherName?: string
+  }
 }
 
 export type MSIXAppManifestMetadata = {

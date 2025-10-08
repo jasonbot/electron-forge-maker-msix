@@ -1,5 +1,6 @@
 import { MakerBase, type MakerOptions } from '@electron-forge/maker-base'
 import type { ForgePlatform } from '@electron-forge/shared-types'
+import { getChannelYml, getAppUpdateYml } from 'electron-updater-yaml'
 import fs from 'fs-extra'
 import path from 'node:path'
 import { makeAppXImages as makeMSIXImageTiles } from './imageAssets'
@@ -61,6 +62,45 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
     return process.platform === 'win32'
   }
 
+  /**
+   * Maybe creates an app-update.yml, compatible with electron-updater
+   */
+  async createAppUpdateYml(options: MakerOptions, outPath: string) {
+    if (!this.config.updater) return
+
+    const ymlContents = await getAppUpdateYml({
+      url: this.config.updater.url,
+      name: options.appName,
+      channel: this.config.updater.channel,
+      updaterCacheDirName: this.config.updater.updaterCacheDirName,
+      publisherName: this.config.updater.publisherName,
+    })
+
+    log(`Writing app-update.yml to ${outPath}`, ymlContents)
+    await fs.writeFile(path.join(outPath, 'resources', 'app-update.yml'), ymlContents, 'utf8')
+  }
+
+  async createChannelYml(
+    options: MakerOptions,
+    installerPath: string
+  ): Promise<string | undefined> {
+    if (!this.config.updater) return
+
+    const channel = this.config.updater.channel || 'latest'
+    const version = options.packageJSON.version
+    const channelFilePath = path.resolve(installerPath, `${channel}.yml`)
+
+    const ymlContents = await getChannelYml({
+      installerPath,
+      version,
+      platform: 'win32',
+    })
+
+    log(`Writing ${channel}.yml to ${installerPath}`, ymlContents)
+    await fs.writeFile(channelFilePath, ymlContents, 'utf8')
+    return channelFilePath
+  }
+
   async make(options: MakerOptions): Promise<string[]> {
     const appID =
       this.config.internalAppID ??
@@ -111,6 +151,8 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
       options,
     })
 
+    await this.createAppUpdateYml(options, outPath)
+    const channelYamlPath = await this.createChannelYml(options, options.makeDir)
     await makeAppManifest(scratchPath, manifestConfig)
     const appInstallerPath = await makeAppInstaller(outPath, scratchPath, manifestConfig)
     await makePRI(scratchPath, this.config)
@@ -119,6 +161,6 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
     const outMSIX = path.join(outPath, manifestConfig.msixFilename)
     await makeMSIX(scratchPath, outMSIX, this.config)
 
-    return [outMSIX, appInstallerPath].filter((filename) => filename !== undefined)
+    return [outMSIX, appInstallerPath, channelYamlPath].filter((filename) => filename !== undefined)
   }
 }
