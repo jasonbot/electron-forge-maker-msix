@@ -73,8 +73,11 @@ const makeAppUpdateYml = async (
     publisherName: config.updater.publisherName,
   })
 
-  log(`Writing app-update.yml to ${outPath}`, ymlContents)
-  await fs.writeFile(path.join(outPath, 'app-update.yml'), ymlContents, 'utf8')
+  const resourcePath = path.join(outPath, 'resources')
+
+  log(`Writing app-update.yml to ${resourcePath}`, ymlContents)
+  await fs.ensureDir(resourcePath)
+  await fs.writeFile(path.join(resourcePath, 'app-update.yml'), ymlContents, 'utf8')
 }
 
 const makeChannelYml = async (
