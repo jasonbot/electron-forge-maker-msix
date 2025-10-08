@@ -101,6 +101,7 @@ const makeAppManifestXML = ({
   appInstallerFilename,
   runAtStartup,
   startupParams,
+  appURIHandlers,
 }: MSIXAppManifestMetadata): string => {
   const startupExtension = runAtStartup
     ? `
@@ -151,6 +152,17 @@ const makeAppManifestXML = ({
                 </uap3:Extension>
 `
       }
+    }
+  }
+
+  if (appURIHandlers) {
+    for (const appURIHandler of appURIHandlers) {
+      extensions += `<uap3:Extension Category="windows.appUriHandler">
+          <uap3:AppUriHandler>
+            <uap3:Host Name="${xmlSafeString(appURIHandler)}" />
+          </uap3:AppUriHandler>
+        </uap3:Extension>
+`
     }
   }
 
@@ -283,6 +295,7 @@ export const makeManifestConfiguration = ({
     allowRollbacks: config.allowRollbacks,
     runAtStartup: !!config.runAtStartup,
     startupParams: config.startupParams,
+    appURIHandlers: config.appURIHandlers,
   }
 }
 

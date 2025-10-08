@@ -30,6 +30,7 @@ export type MakerMSIXConfig = {
   allowRollbacks?: boolean
   runAtStartup?: boolean
   startupParams?: string
+  appURIHandlers?: string[]
 }
 
 export type MSIXAppManifestMetadata = {
@@ -49,4 +50,5 @@ export type MSIXAppManifestMetadata = {
   allowRollbacks: boolean | undefined
   runAtStartup: boolean
   startupParams: string | undefined
+  appURIHandlers: string[] | undefined
 }
