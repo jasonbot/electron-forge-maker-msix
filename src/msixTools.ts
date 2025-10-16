@@ -101,6 +101,7 @@ const makeAppManifestXML = ({
   copilotKey,
   baseDownloadURL,
   appInstallerFilename,
+  makeAppInstaller,
   runAtStartup,
   startupParams,
   appURIHandlers,
@@ -130,7 +131,7 @@ const makeAppManifestXML = ({
 `
 
   let autoUpdateXML = ''
-  if (baseDownloadURL) {
+  if (baseDownloadURL && makeAppInstaller) {
     autoUpdateXML += `<uap13:AutoUpdate>
         <uap13:AppInstaller File="${xmlSafeString(appInstallerFilename)}" />
     </uap13:AutoUpdate>
