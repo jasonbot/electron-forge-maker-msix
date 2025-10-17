@@ -170,7 +170,7 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
     await makeContentTypeXML(msixBuildFolderRootPath)
     const outMSIX = path.join(outPath, manifestConfig.msixFilename)
     await packageMSIXFromFolder(msixBuildFolderRootPath, outMSIX, this.config)
-    const channelYamlPath = await makeChannelYml(this.config, options, outMSIX)
+    const channelYamlPath = await makeChannelYml(this.config, options, outPath)
 
     return [outMSIX, appInstallerPath, channelYamlPath].filter((filename) => filename !== undefined)
   }
