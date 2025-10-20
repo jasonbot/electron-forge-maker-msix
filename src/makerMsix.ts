@@ -1,6 +1,6 @@
 import { MakerBase, type MakerOptions } from '@electron-forge/maker-base'
 import type { ForgePlatform } from '@electron-forge/shared-types'
-import { getChannelYml, getAppUpdateYml } from 'electron-updater-yaml'
+import { getChannelYml, getAppUpdateYml } from './yaml'
 import fs from 'fs-extra'
 import path from 'node:path'
 import { makeAppXImages as createMSIXImageTiles } from './imageAssets'

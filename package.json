@@ -1,6 +1,6 @@
 {
 	"name": "@jasonscheirer/electron-forge-maker-msix",
-	"version": "0.7.4",
+	"version": "0.7.5",
 	"description": "An `electron-forge` maker for MSIX that supports `electron-forge` v6 and can be used as a replacement for `electron-builder`. Supports code-signing.",
 	"main": "dist/cjs/makerMsix.js",
 	"module": "dist/esm/makerMsix.js",
@@ -26,8 +26,7 @@
 		"debug": "^4.4.0",
 		"fs-extra": "^11.2.0",
 		"sharp": "^0.34.2",
-		"yarn": "^1.22.22",
-		"electron-updater-yaml": "^1.1.2"
+		"yarn": "^1.22.22"
 	},
 	"devDependencies": {
 		"@types/debug": "^4.1.8",
