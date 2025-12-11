@@ -239,6 +239,7 @@ const makeAppManifestXML = ({
     </Dependencies>
     <Capabilities>
         <rescap:Capability Name="runFullTrust" />
+        <rescap:Capability Name="packageManagement" />
         <Capability Name="internetClient" />
         ${additionalCapabilities}
     </Capabilities>
