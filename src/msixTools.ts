@@ -88,7 +88,7 @@ const CapabilityMap: Record<AppCapability, string> = {
   Webcam: '<DeviceCapability Name="webcam"/>',
 }
 
-const makeAppManifestXML = ({
+export const makeAppManifestXML = ({
   appID,
   appName,
   architecture,
@@ -113,7 +113,7 @@ const makeAppManifestXML = ({
           Executable="${xmlSafeString(executable)}"
           ${startupParams ? `uap11:Parameters="${xmlSafeString(startupParams)}"` : ''}
           EntryPoint="Windows.FullTrustApplication">
-          <desktop:StartupTask TaskId="SlackStartup" Enabled="true" DisplayName="${xmlSafeString(appName)}" />
+          <desktop:StartupTask TaskId="${xmlSafeString(appID)}.Startup" Enabled="true" DisplayName="${xmlSafeString(appName)}" />
         </desktop:Extension>
   `
     : ''
@@ -212,7 +212,7 @@ const makeAppManifestXML = ({
     xmlns:uap6="http://schemas.microsoft.com/appx/manifest/uap/windows10/6"
     xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
     xmlns:uap11="http://schemas.microsoft.com/appx/manifest/uap/windows10/11"
-    xmlns:uap13="http://schemas.microsoft.com/appx/manifest/uap/windows10/13" 
+    xmlns:uap13="http://schemas.microsoft.com/appx/manifest/uap/windows10/13"
     xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
     xmlns:desktop2="http://schemas.microsoft.com/appx/manifest/desktop/windows10/2"
     xmlns:desktop7="http://schemas.microsoft.com/appx/manifest/desktop/windows10/7"
@@ -246,9 +246,9 @@ const makeAppManifestXML = ({
     <Applications>
         <Application Id="${xmlSafeString(appID)}" Executable="${xmlSafeString(executable)}"
             EntryPoint="Windows.FullTrustApplication">
-            <uap:VisualElements BackgroundColor="transparent" DisplayName="Notion"
+            <uap:VisualElements BackgroundColor="transparent" DisplayName="${xmlSafeString(appName)}"
                 Square150x150Logo="assets\\${xmlSafeString(appID)}-150x150Logo.png"
-                Square44x44Logo="assets\\${xmlSafeString(appID)}-44x44Logo.png" Description="Notion">
+                Square44x44Logo="assets\\${xmlSafeString(appID)}-44x44Logo.png" Description="${xmlSafeString(appName)}">
                 <uap:DefaultTile Wide310x150Logo="assets\\${xmlSafeString(appID)}-310x150Logo.png"
                     Square310x310Logo="assets\\${xmlSafeString(appID)}-310x310Logo.png"
                     Square71x71Logo="assets\\${xmlSafeString(appID)}-71x71Logo.png" />
