@@ -17,6 +17,10 @@ import { codesign } from './sign'
 import type { MakerMSIXConfig } from './types'
 import { findInWindowsKits, walk } from './walk'
 
+export * from './msixTools'
+export * from './imageAssets'
+export * from './types'
+
 const findMainExecutable = async (rootPath: string): Promise<string> => {
   let executable: string | undefined
   for await (const fileName of walk(rootPath)) {
@@ -172,6 +176,6 @@ export default class MakerMSIX extends MakerBase<MakerMSIXConfig> {
     await packageMSIXFromFolder(msixBuildFolderRootPath, outMSIX, this.config)
     const channelYamlPath = await makeChannelYml(this.config, options, outPath)
 
-    return [outMSIX, appInstallerPath, channelYamlPath].filter((filename) => filename !== undefined)
+    return [outMSIX, appInstallerPath, channelYamlPath].filter(Boolean) as string[]
   }
 }
