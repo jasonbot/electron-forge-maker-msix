@@ -98,11 +98,13 @@ export const makeAppManifestXML = ({
   version,
   protocols,
   appCapabilities,
+  allowExternalContent,
   copilotKey,
   baseDownloadURL,
   appInstallerFilename,
   makeAppInstaller,
   runAtStartup,
+  exeAlias,
   startupParams,
   appURIHandlers,
 }: MSIXAppManifestMetadata): string => {
@@ -118,7 +120,8 @@ export const makeAppManifestXML = ({
   `
     : ''
 
-  let extensions = `
+  const exeAliasExtension = exeAlias
+    ? `
         ${startupExtension}
         <uap3:Extension
           Category="windows.appExecutionAlias"
@@ -128,6 +131,12 @@ export const makeAppManifestXML = ({
             <desktop:ExecutionAlias Alias="${xmlSafeString(executable.split(/[/\\]/).pop())}" />
           </uap3:AppExecutionAlias>
         </uap3:Extension>
+`
+    : ''
+
+  let extensions = `
+        ${startupExtension}
+        ${exeAliasExtension}
 `
 
   let autoUpdateXML = ''
@@ -229,6 +238,7 @@ export const makeAppManifestXML = ({
         <uap10:PackageIntegrity>
             <uap10:Content Enforcement="on" />
         </uap10:PackageIntegrity>
+        <uap10:AllowExternalContent>${allowExternalContent}</uap10:AllowExternalContent>
         ${autoUpdateXML}
     </Properties>
     <Resources>
@@ -290,6 +300,7 @@ export const makeManifestConfiguration = ({
     architecture: options.targetArch,
     version,
     publisher: config.publisher,
+    allowExternalContent: !!config.allowExternalContent,
     protocols: options.forgeConfig.packagerConfig.protocols,
     baseDownloadURL: config.baseDownloadURL,
     makeAppInstaller: config.makeAppInstaller ?? true,
@@ -300,6 +311,7 @@ export const makeManifestConfiguration = ({
     allowRollbacks: config.allowRollbacks,
     runAtStartup: !!config.runAtStartup,
     startupParams: config.startupParams,
+    exeAlias: !!config.exeAlias,
     appURIHandlers: config.appURIHandlers,
   }
 }
