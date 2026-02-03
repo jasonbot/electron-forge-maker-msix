@@ -236,7 +236,7 @@ export const makeAppManifestXML = ({
         <Description>${xmlSafeString(appDescription)}</Description>
         <Logo>assets\\StoreLogo.png</Logo>
         <uap10:PackageIntegrity>
-            <uap10:Content Enforcement="on" />
+            <uap10:Content Enforcement="off" />
         </uap10:PackageIntegrity>
         <uap10:AllowExternalContent>${allowExternalContent}</uap10:AllowExternalContent>
         ${autoUpdateXML}
