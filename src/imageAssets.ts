@@ -69,8 +69,19 @@ export const makeAppXImages = async (
       if (scale === 100) {
         const imageName = `${baseName}.png`
         const pathOnDiskWithoutScale = path.join(path.join(assetPath, imageName))
-
         await fs.copyFile(pathOnDiskWithScale, pathOnDiskWithoutScale)
+
+        const unplatedLightImageName = `${baseName}.targetsize-${dimensions.w}_altform-lightunplated.png`
+        const pathOnDiskWithoutScaleAndUnplated = path.join(
+          path.join(assetPath, unplatedLightImageName)
+        )
+        await fs.copyFile(pathOnDiskWithScale, pathOnDiskWithoutScaleAndUnplated)
+
+        const unplatedDarkImageName = `${baseName}.targetsize-${dimensions.w}_altform-unplated.png`
+        const pathOnDiskWithoutScaleAndDarkUnplated = path.join(
+          path.join(assetPath, unplatedDarkImageName)
+        )
+        await fs.copyFile(pathOnDiskWithScale, pathOnDiskWithoutScaleAndDarkUnplated)
       }
     }
   }
