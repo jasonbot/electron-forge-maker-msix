@@ -168,14 +168,13 @@ export const makeAppManifestXML = ({
   }
 
   if (appURIHandlers) {
-    for (const appURIHandler of appURIHandlers) {
-      extensions += `<uap3:Extension Category="windows.appUriHandler">
+    const hosts = appURIHandlers.map(h => `            <uap3:Host Name="${xmlSafeString(h)}" />`).join('\n')
+    extensions += `<uap3:Extension Category="windows.appUriHandler">
           <uap3:AppUriHandler>
-            <uap3:Host Name="${xmlSafeString(appURIHandler)}" />
+${hosts}
           </uap3:AppUriHandler>
         </uap3:Extension>
 `
-    }
   }
 
   let minVersionTested = '10.0.17763.0'
