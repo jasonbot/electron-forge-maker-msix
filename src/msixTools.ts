@@ -76,9 +76,13 @@ export const getPublisher = async (
   if (foundPublisher) {
     return foundPublisher
   } else {
-    throw new Error(
-      `Could not determine publisher: ${executable} is not signed or sigcheck is not installed.`
-    )
+    if (config.codesign) {
+      throw new Error(
+        `Could not determine publisher: ${executable} is not signed or sigcheck is not installed.`
+      )
+    } else {
+      return 'CN=My Company LLC, O=My Company LLC, L=San Francisco, S=California, C=US'
+    }
   }
 }
 
@@ -97,6 +101,7 @@ export const makeAppManifestXML = ({
   publisher,
   version,
   protocols,
+  fileAssociations,
   appCapabilities,
   allowExternalContent,
   copilotKey,
@@ -108,6 +113,19 @@ export const makeAppManifestXML = ({
   startupParams,
   appURIHandlers,
 }: MSIXAppManifestMetadata): string => {
+  const fileAssociationsExtension = fileAssociations
+    ? `<uap:Extension Category="windows.fileTypeAssociation">
+					<uap:FileTypeAssociation Name="batchrenamer">
+						<uap:DisplayName>${appName} Readable Files</uap:DisplayName>
+						<uap:Logo>assets\\StoreLogo.png</uap:Logo>
+						<uap:SupportedFileTypes>
+						  ${fileAssociations.map((ext) => `<uap:FileType>${ext}</uap:FileType>`).join('')}
+						</uap:SupportedFileTypes>
+					</uap:FileTypeAssociation>
+				</uap:Extension>
+`
+    : ''
+
   const startupExtension = runAtStartup
     ? `
         <desktop:Extension
@@ -135,6 +153,7 @@ export const makeAppManifestXML = ({
     : ''
 
   let extensions = `
+        ${fileAssociationsExtension}
         ${startupExtension}
         ${exeAliasExtension}
 `
@@ -168,7 +187,9 @@ export const makeAppManifestXML = ({
   }
 
   if (appURIHandlers) {
-    const hosts = appURIHandlers.map(h => `            <uap3:Host Name="${xmlSafeString(h)}" />`).join('\n')
+    const hosts = appURIHandlers
+      .map((h) => `            <uap3:Host Name="${xmlSafeString(h)}" />`)
+      .join('\n')
     extensions += `<uap3:Extension Category="windows.appUriHandler">
           <uap3:AppUriHandler>
 ${hosts}
@@ -301,6 +322,7 @@ export const makeManifestConfiguration = ({
     publisher: config.publisher,
     allowExternalContent: !!config.allowExternalContent,
     protocols: options.forgeConfig.packagerConfig.protocols,
+    fileAssociations: config.fileExtensions,
     baseDownloadURL: config.baseDownloadURL,
     makeAppInstaller: config.makeAppInstaller ?? true,
     msixFilename: `${options.appName}-${options.targetArch}-${version}.msix`,

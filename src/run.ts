@@ -51,7 +51,7 @@ export const run = async (executable: string, args: Array<string>, neverFail = f
         if (neverFail) {
           log(`warning: ${executable} returned: ${code}`)
         } else {
-          return reject(new Error(`Running ${executable} returned: ${code}.`))
+          return reject(new Error(`Running ${executable} ${args.join(' ')} returned: ${code}.`))
         }
       }
       return resolve(collectedStdoutLogForReturn)

@@ -14,6 +14,8 @@ export type CopilotKeyConfiguration = Record<CopilotKeyAction, CopilotKeyURIAndW
 
 export type AppCapability = 'GraphicsCapture' | 'Microphone' | 'Webcam'
 
+export type FileExtension = `.${string}`
+
 export type MakerMSIXConfig = {
   appIcon: string
   publisher?: string
@@ -29,6 +31,7 @@ export type MakerMSIXConfig = {
   allowExternalContent?: boolean
   copilotKey?: CopilotKeyConfiguration
   appCapabilities?: AppCapability[]
+  fileExtensions?: FileExtension[]
   allowRollbacks?: boolean
   runAtStartup?: boolean
   startupParams?: string
@@ -54,6 +57,7 @@ export type MSIXAppManifestMetadata = {
   appInstallerFilename: string
   msixFilename: string
   protocols: MacOSProtocol[] | undefined
+  fileAssociations: FileExtension[] | undefined
   baseDownloadURL: string | undefined
   makeAppInstaller: boolean
   allowExternalContent: boolean
