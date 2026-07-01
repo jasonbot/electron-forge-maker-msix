@@ -1,6 +1,6 @@
 import fs from 'fs-extra'
 import path from 'node:path'
-import Sharp from 'sharp'
+import { Jimp } from 'jimp'
 import type { MakerMSIXConfig } from './types'
 
 type ImageDimensions = {
@@ -16,8 +16,7 @@ const REQUIRED_APPX_DIMENSIONS: ImageDimensions[] = [
   { w: 71, h: 71 },
   { w: 50, h: 50, specialName: 'StoreLogo' },
 ]
-const REQUIRED_APPX_SCALES: number[] = [100, 125, 150, 200, 400]
-const INVISIBLE: Sharp.RGBA = { r: 0, g: 0, b: 0, alpha: 0 }
+const REQUIRED_APPX_SCALES: number[] = [400] // , 125, 150, 200, 400]
 
 export const makeAppXImages = async (
   appID: string,
@@ -38,35 +37,34 @@ export const makeAppXImages = async (
 
       const baseName = dimensions.specialName ?? `${appID}-${w}x${h}Logo`
 
-      const imageNamewithScale = `${baseName}.scale-${scale}.png`
-      const pathOnDiskWithScale = path.join(path.join(assetPath, imageNamewithScale))
+      const imageNamewithScale = `${baseName}.scale-${scale}`
+      const pathOnDiskWithScaleWithoutPng = path.join(path.join(assetPath, imageNamewithScale))
+      const pathOnDiskWithScale: `${string}.${string}` = `${pathOnDiskWithScaleWithoutPng}.${'png'}`
 
-      const image = Sharp(config.appIcon)
+      const image = await Jimp.read(config.appIcon)
+
       // Small touch: superimpose the app icon on a background for banner-sized images
       if ((h > 300 || w > 300) && config.wallpaperIcon) {
-        const bgimage = Sharp(config.wallpaperIcon).resize(imageWidth, imageHeight, {
-          fit: 'cover',
-          background: INVISIBLE,
+        const bgimage = (await Jimp.read(config.wallpaperIcon)).cover({
+          w: imageWidth,
+          h: imageHeight,
         })
-        const overlayicon = await image
-          .resize(Math.trunc(imageWidth * 0.85), Math.trunc(imageHeight * 0.85), {
-            fit: 'inside',
-            background: INVISIBLE,
-          })
-          .toBuffer()
+        const overlayicon = await image.contain({
+          w: Math.trunc(imageWidth * 0.85),
+          h: Math.trunc(imageHeight * 0.85),
+        })
         await bgimage
-          .composite([{ input: overlayicon, gravity: 'center' }])
-          .toFile(pathOnDiskWithScale)
+          .composite(
+            overlayicon,
+            bgimage.width / 2 - overlayicon.width / 2,
+            bgimage.height / 2 - overlayicon.height / 2
+          )
+          .write(pathOnDiskWithScale)
       } else {
-        await image
-          .resize(imageWidth, imageHeight, {
-            fit: 'contain',
-            background: INVISIBLE,
-          })
-          .toFile(pathOnDiskWithScale)
+        await image.cover({ w: imageWidth, h: imageHeight }).write(pathOnDiskWithScale)
       }
 
-      if (scale === 100) {
+      if (scale === 400) {
         const imageName = `${baseName}.png`
         const pathOnDiskWithoutScale = path.join(path.join(assetPath, imageName))
         await fs.copyFile(pathOnDiskWithScale, pathOnDiskWithoutScale)
