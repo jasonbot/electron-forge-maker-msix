@@ -112,6 +112,7 @@ export const makeAppManifestXML = ({
   exeAlias,
   startupParams,
   appURIHandlers,
+  unvirtualizedResources,
 }: MSIXAppManifestMetadata): string => {
   const fileAssociationsExtension = fileAssociations
     ? `<uap:Extension Category="windows.fileTypeAssociation">
@@ -234,6 +235,11 @@ ${hosts}
 `
   }
 
+  const devirtualize = unvirtualizedResources
+    ? `<desktop6:RegistryWriteVirtualization>disabled</desktop6:RegistryWriteVirtualization>
+    <desktop6:FileSystemWriteVirtualization>disabled</desktop6:FileSystemWriteVirtualization>`
+    : ''
+
   return `<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
     xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
@@ -244,6 +250,7 @@ ${hosts}
     xmlns:uap13="http://schemas.microsoft.com/appx/manifest/uap/windows10/13"
     xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
     xmlns:desktop2="http://schemas.microsoft.com/appx/manifest/desktop/windows10/2"
+    xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6"
     xmlns:desktop7="http://schemas.microsoft.com/appx/manifest/desktop/windows10/7"
     xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
     IgnorableNamespaces="uap uap3 uap10 desktop7 rescap">
@@ -260,6 +267,7 @@ ${hosts}
         </uap10:PackageIntegrity>
         <uap10:AllowExternalContent>${allowExternalContent}</uap10:AllowExternalContent>
         ${autoUpdateXML}
+        ${devirtualize}
     </Properties>
     <Resources>
         <Resource Language="en-us" />
@@ -270,6 +278,7 @@ ${hosts}
     <Capabilities>
         <rescap:Capability Name="runFullTrust" />
         <rescap:Capability Name="packageManagement" />
+        ${unvirtualizedResources ? '<rescap:Capability Name="unvirtualizedResources" />' : ''}
         <Capability Name="internetClient" />
         ${additionalCapabilities}
     </Capabilities>
@@ -334,6 +343,7 @@ export const makeManifestConfiguration = ({
     startupParams: config.startupParams,
     exeAlias: !!config.exeAlias,
     appURIHandlers: config.appURIHandlers,
+    unvirtualizedResources: Boolean(config.unvirtualizedResources ?? true),
   }
 }
 

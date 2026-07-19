@@ -37,6 +37,7 @@ export type MakerMSIXConfig = {
   startupParams?: string
   exeAlias?: boolean
   appURIHandlers?: string[]
+  unvirtualizedResources?: boolean
 
   updater?: {
     url: string
@@ -68,4 +69,5 @@ export type MSIXAppManifestMetadata = {
   exeAlias: boolean
   startupParams: string | undefined
   appURIHandlers: string[] | undefined
+  unvirtualizedResources: boolean
 }
