@@ -132,7 +132,7 @@ export const makeAppManifestXML = ({
         <desktop:Extension
           Category="windows.startupTask"
           Executable="${xmlSafeString(executable)}"
-          ${startupParams ? `uap11:Parameters="${xmlSafeString(startupParams)}"` : ''}
+          ${startupParams ? `0:Parameters="${xmlSafeString(startupParams)}"` : ''}
           EntryPoint="Windows.FullTrustApplication">
           <desktop:StartupTask TaskId="${xmlSafeString(appID)}.Startup" Enabled="true" DisplayName="${xmlSafeString(appName)}" />
         </desktop:Extension>
@@ -246,7 +246,6 @@ ${hosts}
     xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
     xmlns:uap6="http://schemas.microsoft.com/appx/manifest/uap/windows10/6"
     xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
-    xmlns:uap11="http://schemas.microsoft.com/appx/manifest/uap/windows10/11"
     xmlns:uap13="http://schemas.microsoft.com/appx/manifest/uap/windows10/13"
     xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
     xmlns:desktop2="http://schemas.microsoft.com/appx/manifest/desktop/windows10/2"
