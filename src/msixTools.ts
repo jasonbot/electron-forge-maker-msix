@@ -132,7 +132,7 @@ export const makeAppManifestXML = ({
         <desktop:Extension
           Category="windows.startupTask"
           Executable="${xmlSafeString(executable)}"
-          ${startupParams ? `0:Parameters="${xmlSafeString(startupParams)}"` : ''}
+          ${startupParams ? `uap10:Parameters="${xmlSafeString(startupParams)}"` : ''}
           EntryPoint="Windows.FullTrustApplication">
           <desktop:StartupTask TaskId="${xmlSafeString(appID)}.Startup" Enabled="true" DisplayName="${xmlSafeString(appName)}" />
         </desktop:Extension>
